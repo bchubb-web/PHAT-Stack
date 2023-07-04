@@ -86,13 +86,11 @@ function route($route, $path_to_include) {
 	include_once __DIR__ . "/$path_to_include";
 	exit();
 }
-function out($text)
-{
+function out($text) {
 	echo htmlspecialchars($text);
 }
 
-function set_csrf()
-{
+function set_csrf() {
 	session_start();
 	if (!isset($_SESSION["csrf"])) {
 		$_SESSION["csrf"] = bin2hex(random_bytes(50));
@@ -100,8 +98,7 @@ function set_csrf()
 	echo '<input type="hidden" name="csrf" value="' . $_SESSION["csrf"] . '">';
 }
 
-function is_csrf_valid()
-{
+function is_csrf_valid() {
 	session_start();
 	if (!isset($_SESSION['csrf']) || !isset($_POST['csrf'])) {
 		return false;
