@@ -38,3 +38,4 @@ get('/htmx/callback/$name/$last_name', function($name, $last_name){
 });
 
 
+require_once __DIR__.'/footer.php';
