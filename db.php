@@ -1,10 +1,13 @@
 <?php
+if (!function_exists('db_query')){
+    function db_query($callback): mysqli_result | bool{
+        if(!is_callable($callback)){
+            return false;
+        }
+        require(__DIR__.'/connection_details.php');
 
-function db_query($callback): bool{
-    if(!is_callable($callback)){
-        return false;
+        $res = call_user_func($callback);
+        mysqli_close($con);
+        return $res;
     }
-    require(__DIR__.'/connection_details.php');
-    $con = mysqli_connect()
-
 }
