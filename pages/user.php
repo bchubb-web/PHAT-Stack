@@ -1,5 +1,11 @@
 <!-- start vars
 $id
-$test
+$edit
 end vars -->
-<h1><?= $id; ?></h1>
+<?php if(isset($params)){
+    var_dump($params);
+    echo '<h1>'.$id.'</h1>';
+}
+else {
+    echo '<h1>No User</h1>';
+}
