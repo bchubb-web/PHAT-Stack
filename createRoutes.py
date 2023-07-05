@@ -10,12 +10,11 @@ get('/', 'pages/home.php');
 
 
 def findVars(listOfLines: list) -> list | bool:
-    print(len(listOfLines))
-    if len(listOfLines) < 2:
-        return False
-    if listOfLines[1][:1] == '//':
-        line = listOfLines[1][2:].strip()
-        return line.split(',').strip()
+    for line in listOfLines:
+        if line[:2] == '//':
+            line = line[2:].strip()
+            vars = line.split(',')
+            return list(map(lambda var: var.strip(), vars))
     return False
 
 
@@ -24,12 +23,13 @@ def makeRoute(route: str, page: str) -> str:
 
 
 for page in pages:
+    print(page)
     routeBase = page.split('.')[0]
     toWrite += makeRoute(routeBase, page)
     rawFile = open('./pages/'+page, 'r')
     vars = findVars(list(rawFile))
-    print(type(vars))
     rawFile.close()
+    print(vars)
     if vars:
         for i in range(0, len(vars)):
             semiRoute = '/'.join(vars[:i+1])
