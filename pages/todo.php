@@ -11,7 +11,7 @@
                 class="border-2 border-slate-200"
                 name="input"
             />
-            <button type="submit" class="rounded border-2 border-slate-200 bg-slate-50" >CLICKEROONI</button>
+            <button type="submit" class="rounded border-2 border-slate-200 bg-slate-50" >Add</button>
         </form>
         <div id="todo-list" class="flex flex-col gap-1">
         </div>
