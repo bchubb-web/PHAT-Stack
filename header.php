@@ -6,5 +6,6 @@
     </head>
     <body>
         <header>
+            <?= PAGE ?>
         </header>
         <main>

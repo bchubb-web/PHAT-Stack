@@ -1,4 +1,0 @@
-#!/usr/bin/env bash 
-
-./createroutes.sh
-php -S localhost:8000

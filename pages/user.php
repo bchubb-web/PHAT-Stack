@@ -2,10 +2,8 @@
 $id
 $edit
 end vars -->
-<?php if(isset($params)){
-    var_dump($params);
-    echo '<h1>'.$id.'</h1>';
-}
-else {
-    echo '<h1>No User</h1>';
+<?php 
+
+if (PARAMS){
+    echo '<h1>'.PARAMS[0].'</h1>';
 }
