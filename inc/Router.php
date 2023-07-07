@@ -1,7 +1,5 @@
 <?php
 class Router{
-    private array $params;
-
     
     public static function generatePages() {
 

@@ -1,8 +1,8 @@
 <html>
     <head>
-        <script src="/assets/js/htmx.min.js"></script>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <title>PHAT Stack</title>
+        <script src="/dist/js/htmx.min.js"></script>
+        <link href="/dist/main.css" rel="stylesheet"></link>
+        <title><?= PAGE ?></title>
     </head>
     <body>
         <header>

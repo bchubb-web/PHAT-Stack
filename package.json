@@ -1,0 +1,23 @@
+{
+  "name": "phantm-stack",
+  "version": "1.0.0",
+  "description": "The phattest, juciest stack for web dev, using PHP to serve HTMX and styled with TailwindCSS, anything is possible.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx tailwindcss -i ./src/styles/main.css -o ./dist/main.css; php -S localhost:8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bchubb-web/PHAT-Stack.git"
+  },
+  "author": "William Chubb",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bchubb-web/PHAT-Stack/issues"
+  },
+  "homepage": "https://github.com/bchubb-web/PHAT-Stack#readme",
+  "dependencies": {
+    "tailwindcss": "^3.3.2"
+  }
+}
