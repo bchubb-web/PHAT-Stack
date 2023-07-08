@@ -1,3 +1,4 @@
 connection_details.php
 node_modules/
 package-lock.json
+dist/

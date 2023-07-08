@@ -1,7 +1,7 @@
 <html>
     <head>
-        <script src="/dist/js/htmx.min.js"></script>
-        <link href="/dist/main.css" rel="stylesheet"></link>
+        <script src="/dist/main.min.js"></script>
+        <link href="/dist/main.min.css" rel="stylesheet"></link>
         <title><?= PAGE ?></title>
     </head>
     <body>
