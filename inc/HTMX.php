@@ -86,4 +86,15 @@ class HTMX{
         include_once __DIR__ . "/$path_to_include";
         exit();
     }
+    
+    public static function component(string $component_name): void {
+        $component_path = __DIR__.'/../src/components/';
+        if (!strpos($component_name, '.php')) {
+            $component_name .= '.php';
+        }
+        if(!file_exists($component_path.$component_name)) echo '404';
+        include($component_path.$component_name);
+        unset($component_path);
+        unset($component_name);
+    }
 }

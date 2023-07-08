@@ -9,7 +9,7 @@
         >
             <input placeholder="enter todo"
                 class="border-2 border-slate-200 w-full"
-                name="input"
+                name="todo"
             />
             <button type="submit" class="rounded border-2 border-slate-200 bg-slate-50 px-2" >Add</button>
         </form>
