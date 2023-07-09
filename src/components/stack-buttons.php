@@ -10,4 +10,10 @@
         hx-target="#stack"
         hx-swap="innerHTML"
     >pop</button>
+
+    <button class='bg-red-500 w-16'
+        hx-post="/htmx/stack/reset"
+        hx-target="#stack"
+        hx-swap="innerHTML"
+    >reset</button>
 </div>
