@@ -1,10 +1,16 @@
 <?php
 HTMX::put('/htmx/stack/push', function(){
-    HTMX::component('stack-element');
+    session_start();
+    if ($_SESSION['pointer'] < $_SESSION['max'] -1)
+        $_SESSION['pointer'] +=1;
+    HTMX::component('stack');
 });
 
 HTMX::post('/htmx/stack/pop', function(){
-    HTMX::component('stack-empty');
+    session_start();
+    if ($_SESSION['pointer'] > 0)
+        $_SESSION['pointer']-=1;
+    HTMX::component('stack');
 });
 
 HTMX::post('/htmx/stack/create', function(){

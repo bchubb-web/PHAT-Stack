@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.full {
+    position: relative;
+}
+.pointer::after{
+    position: absolute;
+    right: -1rem;
+    transform: translate(0px, 50%);
+    content: '<';
+}
