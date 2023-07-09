@@ -21,3 +21,4 @@ function is_csrf_valid() {
 	}
 	return true;
 }
+

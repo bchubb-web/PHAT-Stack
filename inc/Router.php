@@ -1,25 +1,21 @@
 <?php
 class Router{
     
-    public static function generatePages() {
-
+    public static function get_pages() {
         self::get('/', 'pages/home.php');
 
-        $dir = scandir(__DIR__.'/../pages');
-
-        if ($dir){
-            $pages = array_slice($dir, 2);
-            foreach ($pages as $page) {
-                $path = 'pages/'.$page;
-                $name = substr($page, 0, strpos($page, '.php'));
-                self::get('/'.$name, $path);
-            }
-            unset($pages);
+        $pages = new GlobIterator(__DIR__."/../pages/*.php");
+        while($pages->valid()){
+            $page_name = $pages->current()->getFilename();
+            $path = 'pages/'.$page_name;
+            $name = substr($page_name, 0, strpos($page_name, '.php'));
+            self::get('/'.$name, $path);
+            $pages->next();
         }
-        unset($dir);
 
         self::any('/404','404.php');
     }
+
     public static function get($route, $path_to_include) {
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             self::route($route, $path_to_include);
@@ -50,8 +46,8 @@ class Router{
         array_shift($route_parts);
         array_shift($request_url_parts);
 
-        // define / route
         $toRoute = false;
+        // define / route
         if ($route_parts[0] == '' && count($request_url_parts) == 0) {
             $toRoute = true;
         } else if ($route_parts[0] === $request_url_parts[0]){

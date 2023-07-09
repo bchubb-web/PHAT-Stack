@@ -94,7 +94,13 @@ class HTMX{
         }
         if(!file_exists($component_path.$component_name)) echo '404';
         include($component_path.$component_name);
-        unset($component_path);
-        unset($component_name);
+    }
+
+    public static function get_api_routes() {
+        $globFiles = new GlobIterator(__DIR__."/../api/*.php");
+        while($globFiles->valid()){
+            include __DIR__."/../api/".$globFiles->current()->getFilename();
+            $globFiles->next();
+        }
     }
 }
