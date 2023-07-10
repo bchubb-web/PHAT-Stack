@@ -2,10 +2,10 @@
 <html>
     <head>
         <script src="/dist/main.min.js"></script>
-        <link href="/dist/main.min.css" rel="stylesheet"></link>
         <title><?= PAGE ?></title>
     </head>
     <body>
+        <?php include(__DIR__.'/styles.php'); ?>
         <header>
         </header>
         <main>
