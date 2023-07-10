@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "npm run development",
-    "development": "npx tailwindcss -i ./src/styles/main.css -o ./src/styles/app.css; npx mix; php -S localhost:8000",
+    "development": "npx tailwindcss -i ./src/styles/main.css -o ./src/styles/app.css; node ./tw-compiler.js; php -S localhost:8000",
     "prod": "npm run production",
-    "production": "npx tailwindcss -i ./src/styles/main.css -o ./src/styles/app.css; npx mix"
+    "production": "npx tailwindcss -i ./src/styles/main.css -o ./src/styles/app.css; node ./tw-compiler.js"
   },
   "repository": {
     "type": "git",
@@ -22,10 +22,8 @@
   "homepage": "https://github.com/bchubb-web/PHAT-Stack#readme",
   "dependencies": {
     "eslint": "^8.44.0",
-    "laravel-mix": "^6.0.49",
     "tailwindcss": "^3.3.2"
   },
   "devDependencies": {
-    "webpack": "^5.88.1"
   }
 }
