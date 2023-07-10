@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: "Chela";
+    src: url(../src/fonts/ChelaOne-Regular.ttf);
+}
+
 .full {
     position: relative;
 }

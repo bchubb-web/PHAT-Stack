@@ -42,12 +42,10 @@ class Router{
         $request_url_parts = explode('/', $request_url);
 
 
-
         array_shift($route_parts);
         array_shift($request_url_parts);
 
         $toRoute = false;
-        // define / route
         if ($route_parts[0] == '' && count($request_url_parts) == 0) {
             $toRoute = true;
         } else if ($route_parts[0] === $request_url_parts[0]){
