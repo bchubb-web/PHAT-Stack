@@ -1,6 +1,6 @@
 <?php if(isset($_GET['size'])){
     $_SESSION['pointer'] = 0;
-    header('location: /stack/'.$_GET['size']);
+    header('location: /stack/'.strval($_GET['size']));
 } ?>
 
 <section class="flex align-center justify-center flex-col">
@@ -11,11 +11,11 @@
     if (!isset($_SESSION['pointer']))
         $_SESSION['pointer'] = 0;
     if (PARAMS[0] < $_SESSION['pointer'])
-        $_SESSION['pointer'] = PARAMS[0]-1;
+        $_SESSION['pointer'] = intval(PARAMS[0])-1;
 
-    HTMX::component('stack');
-    HTMX::component('stack-buttons');
+    DOM::component('stack');
+    DOM::component('stack-buttons');
 else:
-    HTMX::component('data-structure-init');
+    DOM::component('data-structure-init');
 endif; ?>
 </section>

@@ -87,14 +87,14 @@ class HTMX{
         exit();
     }
     
-    public static function component(string $component_name): void {
+    /*public static function component(string $component_name): void {
         $component_path = __DIR__.'/../src/components/';
         if (!strpos($component_name, '.php')) {
             $component_name .= '.php';
         }
         if(!file_exists($component_path.$component_name)) echo '404';
         include($component_path.$component_name);
-    }
+    }*/
 
     public static function get_api_routes() {
         $globFiles = new GlobIterator(__DIR__."/../api/*.php");

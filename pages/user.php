@@ -1,7 +1,3 @@
-<!-- start vars
-$id
-$edit
-end vars -->
 <?php 
 
 if (PARAMS){

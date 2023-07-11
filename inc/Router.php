@@ -14,6 +14,7 @@ class Router{
         }
 
         self::any('/404','404.php');
+        $page_contents = ob_get_contents();
     }
 
     public static function get(string $route, string $path_to_include) {
