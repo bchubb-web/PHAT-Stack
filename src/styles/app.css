@@ -753,7 +753,13 @@ video {
 @font-face {
   font-family: "Chela";
 
+  font-style: normal;
+
+  font-weight: 400;
+
   src: url(../src/fonts/ChelaOne-Regular.ttf);
+
+  font-display: swap;
 }
 
 .full {

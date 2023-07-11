@@ -5,14 +5,15 @@ header("Pragma: no-cache");
 session_start();
 
 include_once(__DIR__.'/functions.php');
-include_once(__DIR__.'/database.php');
+//include_once(__DIR__.'/database.php');
 
 
 
-
+include_once(__DIR__.'/Font.php');
 
 include_once(__DIR__.'/HTMX.php');
 HTMX::get_api_routes();
 
 include_once(__DIR__.'/Router.php');
 Router::get_pages();
+

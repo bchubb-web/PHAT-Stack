@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
-        <script src="/dist/main.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link type="text/javascript" rel="preload" href="/dist/main.min.js" as="script"/>
+        <?= Font::get_fonts(); ?>
+        <script  src="https://cdn.tailwindcss.com"></script>
         <title><?= PAGE ?></title>
-        <script src="https://cdn.tailwindcss.com"></script>
+
     </head>
     <body>
         <?php include(__DIR__.'/styles.php'); ?>

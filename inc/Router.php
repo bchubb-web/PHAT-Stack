@@ -16,7 +16,7 @@ class Router{
         self::any('/404','404.php');
     }
 
-    public static function get($route, $path_to_include) {
+    public static function get(string $route, string $path_to_include) {
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             self::route($route, $path_to_include);
         }
