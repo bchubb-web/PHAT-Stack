@@ -1,12 +1,32 @@
 <?php
 class Router{
     
+    public static function search_dir($dirName) {
+        $dir = new FilesystemIterator($dirName);
+        while($dir->valid()){
+            $page_name = $dir->current()->getFilename();
+            if ($dir->current()->isDir()){
+                self::search_dir($dir->current()->getPathname());
+            } elseif ($dir->current()->getFilename()) {
+
+            }
+            
+            $path = 'pages/'.$page_name;
+            $name = substr($page_name, 0, strpos($page_name, '.php'));
+            self::get('/'.$name, $path);
+            $dir->next();
+        }
+    }
+
     public static function get_pages() {
         self::get('/', 'pages/home.php');
 
-        $pages = new GlobIterator(__DIR__."/../pages/*.php");
-        while($pages->valid()){
+        //$pages = new GlobIterator(__DIR__."/../pages/*.php");
+        $pagesDir = new FilesystemIterator(__DIR__."/../pages/");
+        while($pagesDir->valid()){
             $page_name = $pages->current()->getFilename();
+            if ($pages->current()->isDir()){
+            }
             $path = 'pages/'.$page_name;
             $name = substr($page_name, 0, strpos($page_name, '.php'));
             self::get('/'.$name, $path);
@@ -14,7 +34,7 @@ class Router{
         }
 
         self::any('/404','404.php');
-        $page_contents = ob_get_contents();
+        //$page_contents = ob_get_contents();
     }
 
     public static function get(string $route, string $path_to_include) {
