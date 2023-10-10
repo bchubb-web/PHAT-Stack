@@ -1,8 +1,18 @@
 <?php
+/**
+ * Handles routing and pages directory
+ *
+ * Iterates over the pages directory, register all defined routes, sort and 
+ * prioritise, before selecting and routing the client
+ *
+ */
 class Router{
 
     public static $routes = [];
     
+    /**
+    * Iterate over the pages directory and store all route options
+    */
     public static function register_routes() {
         
         self::get('/', 'pages/page.php');
@@ -17,8 +27,10 @@ class Router{
             }
         }
         self::any('/404','404.php');
+
         dump(self::$routes);
 
+        self::prioritise_routes();
         self::determine_route();
 
     }
@@ -53,17 +65,27 @@ class Router{
         array_shift($route_parts);
         self::$routes[] = $route_parts;
     }
+
+    /**
+    * Select the most likely route from the given set of instantiated endpoints
+    */
     private static function determine_route() {
 
-        self::prioritise_routes();
         foreach(self::$routes as $i => $route) {
             
         }
     }
 
+    /**
+    * Re-order routes to prioritise static, unvariablised routes
+    */
     private static function prioritise_routes() {
+
     }
 
+    /**
+    * Performs the action of including the desired page
+    */
     private static function route($route, $path_to_include) {
 
         // if doesnt have .php extension

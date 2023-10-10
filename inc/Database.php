@@ -1,17 +1,13 @@
 <?php
-$con = false;
-if (class_exists('mysqli')){
-    include_once(__DIR__.'/connections.php');
-    $con = new mysqli($hostname, $username, $password, $database);
-}
 
-/**class SQL {
+class SQL {
+
     private array $config;
-    private $con;
-    private string $table;
+    private mysqli | false $con;
 
     function __construct($hostname, $username, $password) {
-        self->config = [$hostname, $username, $password];
+        if (!$db_secret = Secrets::get('database')) Raise::error(123);
+        $this->config = [...$db_secret];
     }
 
     /**
@@ -20,9 +16,9 @@ if (class_exists('mysqli')){
 	 *
 	 * @param  string $database - name of the desired DB.
      *
-	 *
-    public function connect(string $database): void {
-        self->con = new mysqli(...self->config, $database);
+     */
+    public function connect(): void {
+        $this->con = new mysqli(...self->config);
     }
     
     /**
@@ -31,14 +27,14 @@ if (class_exists('mysqli')){
 	 *
 	 * @param  string $table - name of the desired table.
      *
-	 *
+     */
     public function set_table(string $table_name): void {
         
         $table_check = self->con->query("select 1 from `{$table_name}` LIMIT 1");
         if ($table_check === false) {
-            self->create_table($table_name);
+            $this->create_table($table_name);
         }
-        self->table = $table_name;
+        $this->table = $table_name;
     }
 
     /**
@@ -48,7 +44,7 @@ if (class_exists('mysqli')){
 	 * @param  string $table_name - name of the new table.
      *
 	 * @return mixed res from query
-	 *
+     */
     public function create_table(string $table_name): mixed {
         return self->con->query("CREATE TABLE {$table_name} (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY)");
     }
@@ -57,8 +53,8 @@ if (class_exists('mysqli')){
     /**
 	 * Destruct and close connection
 	 *
-	 *
+     */
     function __destruct() {
         self->con->close();
     }
-}*/
+}
