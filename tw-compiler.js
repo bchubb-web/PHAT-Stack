@@ -2,7 +2,7 @@ const start = performance.now();
 
 import fs from 'fs';
 import readline from 'readline';
-import config from './twc.config.js';
+import config from './.config/twc.config.js';
 
 let comment = false
 let compiledStyles = '';
