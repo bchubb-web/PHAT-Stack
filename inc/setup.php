@@ -6,18 +6,17 @@ session_start();
 
 
 include_once(__DIR__.'/utils.php');
-
+include_once(__DIR__.'/Dom.php');
+include_once(__DIR__.'/Raise.php');
 include_once(__DIR__.'/Secrets.php');
 
 include_once(__DIR__.'/Database.php');
-
-include_once(__DIR__.'/Dom.php');
+$phntm_db = new DB;
 
 include_once(__DIR__.'/HTMX.php');
 HTMX::get_api_routes();
 
 include_once(__DIR__.'/Router.php');
-//$Router = new Router;
 
 Router::register_routes(__DIR__.'/../pages/');
 

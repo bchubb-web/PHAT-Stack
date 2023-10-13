@@ -1,0 +1,1 @@
+<?php dump(Router::$routes); ?>

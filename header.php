@@ -22,4 +22,5 @@
                 </nav>
             </div>
         </header>
-        <main>
+        <main class="relative">
+        <?php Raise::notify(); ?>

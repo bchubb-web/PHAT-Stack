@@ -9,6 +9,7 @@
 class Router{
 
     public static $routes = [];
+    private static $tree = [];
     
     /**
     * Iterate over the pages directory and store all route options
@@ -28,10 +29,19 @@ class Router{
         }
         self::any('/404','404.php');
 
-        dump(self::$routes);
+
+        self::build_tree();
+        
+        $path_to_include = 'page';
+        $params = [];
+
+        define('PAGE', $path_to_include);
+        define('PARAMS', $params);
+        include_once(__DIR__.'/../header.php');
+        dump(self::$tree);
+        include_once(__DIR__.'/../footer.php');
 
         self::prioritise_routes();
-        self::determine_route();
 
     }
 
@@ -113,11 +123,7 @@ class Router{
         array_shift($route_parts);
         array_shift($request_url_parts);
 
-        echo '<pre>';
-        var_dump($route_parts);
-        echo '</pre><br><pre>';
-        var_dump($request_url_parts);
-        echo '</pre><hr>';
+        /*echo '<pre>'; var_dump($route_parts); echo '</pre><br><pre>'; var_dump($request_url_parts); echo '</pre><hr>';*/
 
         $params = self::make_params($route_parts, $request_url_parts);
 
@@ -138,6 +144,30 @@ class Router{
             include_once(__DIR__.'/../footer.php');
             exit();*/
         }
+    }
+
+    private static function build_tree() {
+        $temp_routes = self::$routes;
+        $tree = [ ];
+        foreach ($temp_routes as $parts) {
+            // set current node to root of tree, work down each time
+            $node = &$tree;
+            foreach ( $parts as $level )   {
+                // find if node exists
+                $newNode = array_search ($level, array_column($node, "name")??[]);
+                if ( $newNode === false ) {
+                    // if not, create new node
+                    $newNode = array_push( $node, [ "name" => $level, "children" => []]) -1;
+                }
+                // set new current node to the children of the current node
+                $node = &$node[$newNode]["children"];
+            }
+        }
+        self::$tree = $tree;
+    }
+
+    private static function sort_level($level) {
+        dump($level);
     }
 }
 
