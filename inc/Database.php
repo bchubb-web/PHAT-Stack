@@ -4,11 +4,21 @@ class DB {
 
     private array $config;
     private mysqli | false $con;
+    private string | null $table;
 
+    /**
+	 * Instantiates a connection with MySql
+	 *
+     */
     function __construct() {
+        if (!class_exists('mysqli')) {
+            Raise::error(500, "MySqli extension not found");
+            return;
+        }
+
         if (!$db_secret = Secrets::get('database')) Raise::error(123, "Secret Collection Failed");
         $this->config = [...$db_secret];
-        $this->connect();
+        $this->table = null;
     }
 
     /**
@@ -18,10 +28,10 @@ class DB {
 	 * @param  string $database - name of the desired DB.
      *
      */
-    private function connect(): bool {
-        dump($this->config);
+    public function connect(string $database): bool {
+        
         try {
-            $con = new mysqli(...$this->config);
+            $con = new mysqli(...$this->config, ...[$database]);
         } catch (Exception $e) {
             Raise::error(500, "DB Connection failed: ".$e);
             return false;
@@ -37,14 +47,14 @@ class DB {
 	 * @param  string $table - name of the desired table.
      *
      */
-    /*public function set_table(string $table_name): void {
+    public function set_table(string $table_name): void {
+        if (!isset($this->con)) return;
         
-        $table_check = $this->con->query("select 1 from `{$table_name}` LIMIT 1");
-        if ($table_check === false) {
+        if (!$this->con->query("select 1 from `{$table_name}` LIMIT 1")) {
             $this->create_table($table_name);
         }
         $this->table = $table_name;
-    }*/
+    }
 
     /**
 	 * Create new table with id column
@@ -54,16 +64,17 @@ class DB {
      *
 	 * @return mixed res from query
      */
-    /*public function create_table(string $table_name): mixed {
-        return self->con->query("CREATE TABLE {$table_name} (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY)");
-    }*/
+    public function create_table(string $table_name): mixed {
+        return $this->con->query("CREATE TABLE {$table_name} (id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY)");
+    }
 
-    
     /**
 	 * Destruct and close connection
 	 *
      */
     function __destruct() {
-        $this->con->close();
+        if (isset($this->con)){
+            $this->con->close();
+        }
     }
 }
