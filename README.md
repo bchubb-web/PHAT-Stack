@@ -10,7 +10,7 @@ Interactive components are served through simple api, and handled on the client 
 Routing built upon PHP router by https://github.com/phprouter/main.
 Optimised to focus on purely GET requests to pages that exist in the pages/ directory.
 
-Inspired by the app router from NextJS 13, dynamic route parts are denoted by enclosing the variable in {curly braces}.
+Inspired by the app router from NextJS 13, dynamic route parts are denoted by enclosing the variable in \[square brackets\].
 
 ## Api
 HTMX api endpoints are defined manually with the HTMX namespace, passing the route, with desired $variables in place in the uri, and a callback function, echoing HTML or escaping php tags to plain HTML

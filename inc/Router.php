@@ -8,166 +8,131 @@
  */
 class Router{
 
-    public static $routes = [];
-    private static $tree = [];
+    /**
+    * Stores the possible routes
+    */
+    public static array $routes = [];
+
+    /**
+    * The client's url path, split into an array
+    */
+    public static array $client_url_parts = [];
+
+    /**
+    * The deepest folder name in the path
+    */
+    public static string $page = "";
     
     /**
     * Iterate over the pages directory and store all route options
     */
     public static function register_routes() {
         
-        self::get('/', 'pages/page.php');
+        // register the home route
+        self::$routes[] = [];
 
         $dir_itr = new RecursiveDirectoryIterator(__DIR__."/../pages/");
         $entries = new RecursiveIteratorIterator($dir_itr, RecursiveIteratorIterator::SELF_FIRST);
 
         foreach($entries as $name => $_){
-            if (is_dir($name) && !preg_match('/[\.]$/', $name) && file_exists($name.'/page.php') ) {
-                $page_path = explode('pages', $name)[1];
-                self::get($page_path, 'pages'.$page_path.'/page.php');
+            $server_path = explode('inc/../pages', $name)[1];
+            $server_parts = explode('/', $server_path);
+            array_shift($server_parts);
+            // if has the same number of parts
+            if (count($server_parts) != count(self::$client_url_parts)) continue;
+            // if is an file
+            if (!is_dir($name)) continue;
+            // if not /. or /..
+            if (preg_match('/[\.]$/', $name)) continue;
+            // if has a page.php
+            if (!file_exists($name.'/page.php')) continue;
+
+            self::register_route($server_path);
+        }
+
+        self::$routes = self::filter_routes();
+        
+        
+        if (in_array(self::$client_url_parts, self::$routes)) {
+            self::route(implode('/',self::$client_url_parts));
+        }
+        self::$routes = self::filter_dynamic_routes();
+
+        dump(self::$routes);
+        
+        
+        /*include_once(__DIR__.'/../header.php');
+        dump(self::$client_url_parts);
+        include_once(__DIR__.'/../footer.php');*/
+
+    }
+
+    public static function make_client_params() {
+        // formatting
+        $client_url = filter_var($_SERVER['REQUEST_URI'], FILTER_SANITIZE_URL);
+        $client_url = rtrim($client_url, '/');
+        $client_url = strtok($client_url, '?');
+        $client_url_parts = explode('/', $client_url);
+
+        array_shift($client_url_parts);
+
+        $count = count($client_url_parts);
+        for($i=0;$i<$count;$i++) {
+            if (array_key_exists($i, $client_url_parts)) {
+                self::$client_url_parts[] = $client_url_parts[$i];
             }
         }
-        self::any('/404','404.php');
-
-
-        self::build_tree();
-        
-        $path_to_include = 'page';
-        $params = [];
-
-        define('PAGE', $path_to_include);
-        define('PARAMS', $params);
-        include_once(__DIR__.'/../header.php');
-        dump(self::$tree);
-        include_once(__DIR__.'/../footer.php');
-
-        self::prioritise_routes();
-
     }
 
-    public static function make_params(array $server_path, array $client_path): array {
-        
-        $params = [];
-        
-        foreach ($server_path as $i => $server_part) {
-            $client_part = $client_path[$i];
-            if ($server_part == $client_part) {
-                // server part is the same as client part
-            } else if (substr($server_part, -1, 1) === '}' && substr($server_part, 0, 1) === '{') {
-                $params[substr($server_part, 1, -1)] = $client_part;
-            }
-        }
-        return $params;
-    }
-
-    public static function get(string $route, string $path_to_include) {
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-            self::register_route($route, $path_to_include);
-        }
-    }
-
-    public static function any($route, $path_to_include) {
-        self::register_route($route, $path_to_include);
-    }
-
-    public static function register_route($route, $path_to_include) {
-        $route_parts = explode('/', $route);
+    /**
+    * Store the given path into possible routes
+    */
+    public static function register_route(string $server_path): void {
+        $route_parts = explode('/', $server_path);
         array_shift($route_parts);
         self::$routes[] = $route_parts;
     }
 
     /**
-    * Select the most likely route from the given set of instantiated endpoints
+    * Filter out any paths with incorrect path bases
+    * excluding the base route
     */
-    private static function determine_route() {
-
-        foreach(self::$routes as $i => $route) {
-            
-        }
+    private static function filter_routes(): array {
+        return array_values(array_filter(self::$routes, function($r) {
+            if (!array_key_exists(0, $r)) return true;
+            if ($r[0] == self::$client_url_parts[0]) return true;
+            return false;
+        }));
     }
 
     /**
-    * Re-order routes to prioritise static, unvariablised routes
+    * Filter out any paths without variable parameters
     */
-    private static function prioritise_routes() {
-
+    private static function filter_dynamic_routes(): array {
+        return array_values(array_filter(self::$routes, function($r) {
+            $num_dyn_parts = count(array_filter($r, function ($r) {
+                return $r[0] == '[' && substr($r, -1) == ']';
+            }));
+            if ($num_dyn_parts > 0) return true;
+            return false;
+        }));
     }
 
     /**
     * Performs the action of including the desired page
     */
-    private static function route($route, $path_to_include) {
+    private static function route(string $path_to_include): void {
 
         // if doesnt have .php extension
-        if (!strpos($path_to_include, '.php')) {
-            $path_to_include .= '.php';
+        if (!strpos($path_to_include, '/page.php')) {
+            $path_to_include .= '/page.php';
         }
 
-        // 404
-        if ($route == "/404") {
-            /*include_once __DIR__ . "/../$path_to_include";
-            exit();*/
-        }
-        
-        // formatting
-        $request_url = filter_var($_SERVER['REQUEST_URI'], FILTER_SANITIZE_URL);
-        $request_url = rtrim($request_url, '/');
-        $request_url = strtok($request_url, '?');
-        $route_parts = explode('/', $route);
-        $request_url_parts = explode('/', $request_url);
-
-        if (sizeof($route_parts) !== sizeof($request_url_parts)) {
-            return false;
-        }
-
-        array_shift($route_parts);
-        array_shift($request_url_parts);
-
-        /*echo '<pre>'; var_dump($route_parts); echo '</pre><br><pre>'; var_dump($request_url_parts); echo '</pre><hr>';*/
-
-        $params = self::make_params($route_parts, $request_url_parts);
-
-        $toRoute = false;
-        if ($route_parts[0] == '' && count($request_url_parts) == 0) {
-            $toRoute = true;
-        } else if ($route_parts[0] === $request_url_parts[0]){
-            $toRoute = true;
-            array_shift($request_url_parts);
-        }
-
-
-        if ($toRoute) {
-            define('PAGE', $path_to_include);
-            define('PARAMS', $params);
-            /*include_once(__DIR__.'/../header.php');
-            include_once __DIR__ . "/../$path_to_include";
-            include_once(__DIR__.'/../footer.php');
-            exit();*/
-        }
-    }
-
-    private static function build_tree() {
-        $temp_routes = self::$routes;
-        $tree = [ ];
-        foreach ($temp_routes as $parts) {
-            // set current node to root of tree, work down each time
-            $node = &$tree;
-            foreach ( $parts as $level )   {
-                // find if node exists
-                $newNode = array_search ($level, array_column($node, "name")??[]);
-                if ( $newNode === false ) {
-                    // if not, create new node
-                    $newNode = array_push( $node, [ "name" => $level, "children" => []]) -1;
-                }
-                // set new current node to the children of the current node
-                $node = &$node[$newNode]["children"];
-            }
-        }
-        self::$tree = $tree;
-    }
-
-    private static function sort_level($level) {
-        dump($level);
+        //self::$page = end(explode('/',$path_to_include));
+            
+        include_once(__DIR__.'/../header.php');
+        require_once(__DIR__ . "/../pages/$path_to_include");
+        include_once(__DIR__.'/../footer.php');
+        exit();
     }
 }
-

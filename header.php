@@ -5,7 +5,7 @@
         <link type="text/javascript" rel="preload" href="/dist/main.min.js" as="script"/>
         <?= DOM::fonts(); ?>
         <script  src="https://cdn.tailwindcss.com"></script>
-        <title><?= PAGE ?></title>
+        <title><?= Router::$page; ?></title>
         
     </head>
     <body>

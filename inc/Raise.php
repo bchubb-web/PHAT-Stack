@@ -3,8 +3,8 @@
 class Raise {
     private static $notifications = [];
 
-    public static function error(int $code, string $message): void {
-        self::register($code, $message, "red");
+    public static function error(int $code, string $message, string $file="", int $line=-1, string $context=""): void {
+        self::register($code, $message, "red", $file, $line);
     }
 
     public static function warning(int $code): void {
@@ -23,16 +23,20 @@ class Raise {
                 <h4 class="ml-3 text-red-600 font-bold"><?= $notification['code'] ?></h4>
                 <hr>
                 <p><?= $notification['message'] ?></p>
+                <hr>
+                <p><?= $notification['file']."|".$notification['line'] ?></p>
             </div>
         <?php endforeach; ?>
         </section>
     <?php }
 
-    private static function register(int $code, string $message, string $type){
+    private static function register(int $code, string $message, string $type, $file="", $line=-1){
         self::$notifications[] = [
             "code" => $code,
             "message" => $message,
             "type" => $type,
+            "file" => $file,
+            "line" => $line,
         ];
     }
 }
