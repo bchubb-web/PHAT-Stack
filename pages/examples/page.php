@@ -1,3 +1,3 @@
-<a href="/stack">stack</a>
+<a href="/examples/stack">stack</a>
 <hr>
-<a href="/queue">queue</a>
+<a href="/examples/queue">queue</a>

@@ -119,6 +119,26 @@ class Router{
     }
 
     /**
+    * Filter out any paths without variable parameters
+    */
+    private static function match_dynamic_routes(): array {
+         array_filter(self::$routes, function($r) {
+            $num_dyn_parts = count(array_filter($r, function ($r) {
+                return $r[0] == '[' && substr($r, -1) == ']';
+            }));
+            if ($num_dyn_parts > 0) return true;
+            return false;
+        });
+        foreach(self::$routes as $route) {
+            $num_dyn_parts = count(array_filter($route, function ($r) {
+                return $r[0] == '[' && substr($r, -1) == ']';
+            }));
+
+        }
+
+    }
+
+    /**
     * Performs the action of including the desired page
     */
     private static function route(string $path_to_include): void {
@@ -131,8 +151,9 @@ class Router{
         //self::$page = end(explode('/',$path_to_include));
             
         include_once(__DIR__.'/../header.php');
-        require_once(__DIR__ . "/../pages/$path_to_include");
+        include_once(__DIR__ . "/../pages/$path_to_include");
         include_once(__DIR__.'/../footer.php');
         exit();
     }
+
 }
