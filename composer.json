@@ -1,0 +1,19 @@
+{
+    "name": "bchubb/phat-stack",
+    "description": "A server side stack, focused on DX and simplicity",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Bchubb\\PhatStack\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "bchubb-web",
+            "email": "billy@bchubb.co.uk"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
