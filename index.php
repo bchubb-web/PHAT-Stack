@@ -1,2 +1,5 @@
 <?php
-require_once(__DIR__.'/inc/setup.php');
+
+require_once '/vendor/autoload.php';
+
+$phntm = new \Bchubb\Phntm();

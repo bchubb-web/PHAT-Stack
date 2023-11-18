@@ -1,1 +1,0 @@
-require('./htmx.min.js');
