@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file
+ * @Router
  * Provides dynamic route handing
  */
 
@@ -39,25 +39,26 @@ class Router
      * Iterate over the pages directory and store all route options
      *
      * @param string $pages_directory - the base directory to be used
-     * @param Api   $api             - api route handler
+     * @param Api | null  $api - api route handler
      */
     public function __construct(string $pages_directory, Api | null $api = null)
     {
         $this->pages_directory = $pages_directory;
 
         $this->make_client_params();
+        
+        if ( $api !== null && in_array('phntm-api', self::$client_url_parts) === 0 ) { 
 
-        if (array_key_exists(0, self::$client_url_parts)) {
-            if (self::$client_url_parts[0] == 'htmx') {
-                header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-                header("Cache-Control: post-check=0, pre-check=0", false);
-                header("Pragma: no-cache");
+            header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+            header("Cache-Control: post-check=0, pre-check=0", false);
+            header("Pragma: no-cache");
 
-                $api::get_api_routes();
-            }
+            $api::getApiRoutes();
+
         }
 
         self::register_routes($this->pages_directory);
+
     }
 
     /**
@@ -65,17 +66,16 @@ class Router
      *
      * @return void
      */
-    public function register_routes(): void
+    public function register_routes(string $pages_directory): void
     {
 
-        // register the home route
         self::$routes[] = [];
 
-        $itr = new \RecursiveDirectoryIterator(__DIR__ . "/../pages/");
+        $itr = new \RecursiveDirectoryIterator($pages_directory);
         $files = new \RecursiveIteratorIterator($itr, \RecursiveIteratorIterator::SELF_FIRST);
 
         foreach ($files as $name => $_) {
-            $server_path = explode('inc/../pages', $name)[1];
+            //$server_path = explode('inc/../pages', $name)[1];
             $server_parts = explode('/', $server_path);
             array_shift($server_parts);
             // if has the same number of parts
@@ -123,10 +123,12 @@ class Router
     {
         // formatting
         $client_url = filter_var($_SERVER['REQUEST_URI'], FILTER_SANITIZE_URL);
+        $client_url = ltrim($client_url, 'https://');
         $client_url = rtrim($client_url, '/');
         $client_url = strtok($client_url, '?');
         $client_url_parts = explode('/', $client_url);
 
+        //remove hostname from path
         array_shift($client_url_parts);
 
         $count = count($client_url_parts);

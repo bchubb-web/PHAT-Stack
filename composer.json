@@ -8,6 +8,11 @@
             "Bchubb\\Phntm\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Bchubb\\Phntm\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "bchubb-web",
@@ -15,5 +20,7 @@
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "require": {
+        "phpunit/phpunit": "^10.4"
+    }
 }
