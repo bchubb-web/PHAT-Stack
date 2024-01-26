@@ -1,39 +1,48 @@
 <?php
-class HTMX{
-    public static function get($route, $path_to_include) {
+
+class HTMX
+{
+    public static function get($route, $path_to_include)
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             self::route($route, $path_to_include);
         }
     }
-    public static function post($route, $path_to_include) {
+    public static function post($route, $path_to_include)
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             self::route($route, $path_to_include);
         }
     }
 
-    public static function put($route, $path_to_include) {
+    public static function put($route, $path_to_include)
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
             self::route($route, $path_to_include);
         }
     }
 
-    public static function patch($route, $path_to_include) {
+    public static function patch($route, $path_to_include)
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
             self::route($route, $path_to_include);
         }
     }
 
-    public static function delete($route, $path_to_include) {
+    public static function delete($route, $path_to_include)
+    {
         if ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
             self::route($route, $path_to_include);
         }
     }
 
-    public static function any($route, $path_to_include) {
+    public static function any($route, $path_to_include)
+    {
         self::route($route, $path_to_include);
     }
 
-    public static function route($route, $path_to_include) {
+    public static function route($route, $path_to_include)
+    {
         $callback = $path_to_include;
         if (!is_callable($callback)) {
             if (!strpos($path_to_include, '.php')) {
@@ -74,7 +83,7 @@ class HTMX{
                 $route_part = ltrim($route_part, '$');
                 array_push($parameters, $request_url_parts[$i]);
                 $$route_part = $request_url_parts[$i];
-            } else if ($route_parts[$i] != $request_url_parts[$i]) {
+            } elseif ($route_parts[$i] != $request_url_parts[$i]) {
                 return;
             }
         }
@@ -86,11 +95,12 @@ class HTMX{
         include_once __DIR__ . "/$path_to_include";
         exit();
     }
-    
-    public static function get_api_routes() {
-        $globFiles = new GlobIterator(__DIR__."/../api/*.php");
-        while($globFiles->valid()){
-            include __DIR__."/../api/".$globFiles->current()->getFilename();
+
+    public static function get_api_routes()
+    {
+        $globFiles = new GlobIterator(__DIR__ . "/../api/*.php");
+        while ($globFiles->valid()) {
+            include __DIR__ . "/../api/" . $globFiles->current()->getFilename();
             $globFiles->next();
         }
     }

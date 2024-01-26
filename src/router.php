@@ -18,12 +18,12 @@ class Router
     /**
      * Stores the possible routes
      */
-    public static string $pages_directory = '';
+    public string $pages_directory = '';
 
     /**
      * Stores the possible routes
      */
-    public array $routes = [];
+    public static array $routes = [];
 
     /**
      * The client's url path, split into an array
@@ -43,30 +43,27 @@ class Router
      */
     public function __construct(string $pages_directory, Api | null $api = null)
     {
-        $this->pages_directory = $pages_directory;
+        $this->pages_directory = $_SERVER["DOCUMENT_ROOT"] . $pages_directory;
 
-        $this->make_client_params();
-        
-        if ( $api !== null && in_array('phntm-api', self::$client_url_parts) === 0 ) { 
+        $this->makeClientParams();
 
+        if ($api !== null && in_array('phntm-api', self::$client_url_parts) === 0) {
             header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
             header("Cache-Control: post-check=0, pre-check=0", false);
             header("Pragma: no-cache");
 
             $api::getApiRoutes();
-
         }
 
-        self::register_routes($this->pages_directory);
-
+        self::registerRoutes($this->pages_directory);
     }
 
     /**
-     * Iterate over the pages directory and store all route options
+     * Iterate over the pages directory and store all possible routes
      *
      * @return void
      */
-    public function register_routes(string $pages_directory): void
+    public function registerRoutes(string $pages_directory): void
     {
 
         self::$routes[] = [];
@@ -75,7 +72,7 @@ class Router
         $files = new \RecursiveIteratorIterator($itr, \RecursiveIteratorIterator::SELF_FIRST);
 
         foreach ($files as $name => $_) {
-            //$server_path = explode('inc/../pages', $name)[1];
+            $server_path = explode($pages_directory, $name)[1];
             $server_parts = explode('/', $server_path);
             array_shift($server_parts);
             // if has the same number of parts
@@ -95,23 +92,27 @@ class Router
                 continue;
             }
 
-            self::register_route($server_path);
+            self::registerRoute($server_path);
         }
 
-        self::$routes = $this->_filter_routes();
+        self::$routes = $this->filterRoutes();
 
 
         if (in_array(self::$client_url_parts, self::$routes)) {
-            self::_route(implode('/', self::$client_url_parts));
+            self::route(implode('/', self::$client_url_parts));
         }
-        self::$routes = self::_filter_dynamic_routes();
+        self::$routes = self::filterDynamicRoutes();
+    }
 
-        \Bchubb\Phntm\dump(self::$routes);
+    /**
+     * Return list of all Routes
+     *
+     * @return array
+     */
+    public static function routes(): array
+    {
+        return self::$routes;
 
-
-        /*include_once(__DIR__.'/../header.php');
-        dump(self::$client_url_parts);
-        include_once(__DIR__.'/../footer.php');*/
     }
 
     /**
@@ -119,7 +120,7 @@ class Router
      *
      * @return void
      */
-    protected function make_client_params(): void
+    public function makeClientParams(): void
     {
         // formatting
         $client_url = filter_var($_SERVER['REQUEST_URI'], FILTER_SANITIZE_URL);
@@ -146,7 +147,7 @@ class Router
      *
      * @return void
      */
-    public static function register_route(string $server_path): void
+    public static function registerRoute(string $server_path): void
     {
         $route_parts = explode('/', $server_path);
         array_shift($route_parts);
@@ -159,11 +160,11 @@ class Router
      *
      * @return array - array of filtered possible routes
      */
-    private function _filter_routes(): array
+    private function filterRoutes(): array
     {
         return array_values(
             array_filter(
-                $this->routes,
+                self::$routes,
                 function ($r) {
                     if (!array_key_exists(0, $r)) {
                         return true;
@@ -182,7 +183,7 @@ class Router
      *
      * @return array - list of possible variable routes
      */
-    private static function _filter_dynamic_routes(): array
+    private static function filterDynamicRoutes(): array
     {
         return array_values(
             array_filter(
@@ -232,7 +233,7 @@ class Router
      *
      * @return void
      */
-    private static function _route(string $path): void
+    private static function route(string $path): void
     {
 
         // if doesnt have .php extension
@@ -242,9 +243,7 @@ class Router
 
         //self::$page = end(explode('/',$path_to_include));
 
-        include_once __DIR__ . '/../header.php';
-        include_once __DIR__ . "/../pages/$path";
-        include_once __DIR__ . '/../footer.php';
+        include_once __DIR__ . "/../pages$path";
         exit();
     }
 }

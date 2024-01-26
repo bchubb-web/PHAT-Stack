@@ -5,7 +5,7 @@
  * Provides dynamic route handing
  */
 
-namespace Bchubb;
+namespace Bchubb\Phntm;
 
 /**
  * Handles routing and pages
@@ -21,13 +21,12 @@ class Phntm
 
 
 
-    public function __construct( string | bool $api_directory = false )
+    public function __construct(string | bool $api_directory = false)
     {
 
         if ($api_directory) {
-            $this->api_handler = new Phntm\Api($api_directory);
+            $this->api_handler = new Api($api_directory);
         }
-
     }
 
     /**
@@ -37,13 +36,11 @@ class Phntm
      *
      * @return \Bchubb\Phntm\Router
      */
-    public function register_pages_directory(string $pages_base_directory): \Bchubb\Phntm\Router
+    public function registerPagesDirectory(string $pages_base_directory): \Bchubb\Phntm\Router
     {
 
         $this->route_handler = new \Bchubb\Phntm\Router($pages_base_directory, $this->api_handler);
 
         return $this->route_handler;
-
     }
-
 }
