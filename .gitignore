@@ -1,6 +1,7 @@
 connection_details.php
 node_modules/
 package-lock.json
+composer.lock
 dist/
 inc/connections.php
 .secrets/*.*
