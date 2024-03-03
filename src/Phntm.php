@@ -1,6 +1,6 @@
 <?php
 
-namespace Bchubb;
+namespace Bchubb\Phntm;
 
 class Phntm
 {
