@@ -5,15 +5,22 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Bchubb\\Phntm\\": "src/"
+            "bchubbweb\\phntm\\": "src/",
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "bchubbweb\\phntm\\tests\\": "tests/"
         }
     },
     "authors": [
         {
-            "name": "bchubb-web",
+            "name": "bchubbweb",
             "email": "billy@bchubb.co.uk"
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "require": {
+        "phpunit/phpunit": "^11.0"
+    }
 }

@@ -1,77 +1,50 @@
 <?php
 
-/**
- * @file
- * Provides dynamic route handing
- */
+namespace bchubbweb\phntm\Routing;
 
-namespace Bchubb\Phntm;
-
-/**
- * Handles routing and pages
- *
- * Iterates over the pages directory, registers all defined routes, sort and
- * prioritise, before selecting and routing the client
- */
-class Router
+class WebRouter implements Router 
 {
-    /**
-     * Stores the possible routes
-     */
-    public static string $pages_directory = '';
-
-    /**
-     * Stores the possible routes
-     */
-    public array $routes = [];
-
-    /**
-     * The client's url path, split into an array
-     */
-    public static array $client_url_parts = [];
-
-    /**
-     * The deepest folder name in the path
-     */
-    public static string $page = "";
-
     /**
      * Iterate over the pages directory and store all route options
      *
      * @param string $pages_directory - the base directory to be used
      * @param Api   $api             - api route handler
      */
-    public function __construct(string $pages_directory, Api | null $api = null)
+    public function __construct(string $absolute_path_to_pages_directory)
     {
-        $this->pages_directory = $pages_directory;
+        
+        $this->register_root($absolute_path_to_pages_directory);
 
         $this->make_client_params();
-
-        if (array_key_exists(0, self::$client_url_parts)) {
-            if (self::$client_url_parts[0] == 'htmx') {
-                header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-                header("Cache-Control: post-check=0, pre-check=0", false);
-                header("Pragma: no-cache");
-
-                $api::get_api_routes();
-            }
-        }
-
-        self::register_routes($this->pages_directory);
     }
+
+    /**
+     * Define the directory to base routing out of
+     *
+     * @return bool
+     */
+    protected function register_root(string $absolute_path_to_pages_directory): bool
+    {
+        if (!is_dir($absolute_path_to_pages_directory)) return false;
+
+        $this->pages_directory = $absolute_path_to_pages_directory;
+        
+        return true;
+    }
+
 
     /**
      * Iterate over the pages directory and store all route options
      *
      * @return void
      */
-    public function register_routes(): void
+    public function register_routes(string $routes_root_directory): void
     {
 
-        // register the home route
+        // register the index route
         self::$routes[] = [];
 
-        $itr = new \RecursiveDirectoryIterator(__DIR__ . "/../pages/");
+        $itr = new \RecursiveDirectoryIterator($routes_root_directory);
         $files = new \RecursiveIteratorIterator($itr, \RecursiveIteratorIterator::SELF_FIRST);
 
         foreach ($files as $name => $_) {
@@ -109,9 +82,6 @@ class Router
         \Bchubb\Phntm\dump(self::$routes);
 
 
-        /*include_once(__DIR__.'/../header.php');
-        dump(self::$client_url_parts);
-        include_once(__DIR__.'/../footer.php');*/
     }
 
     /**
