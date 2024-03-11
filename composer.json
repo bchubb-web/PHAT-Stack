@@ -5,7 +5,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "bchubbweb\\phntm\\": "src/",
+            "bchubbweb\\phntm\\": "src/"
         }
     },
     "autoload-dev": {
