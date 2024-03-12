@@ -12,12 +12,12 @@ class Asset {
 
     public string $content = '';
 
-    public function get_content(): string
+    public function getContent(): string
     {
         return $this->content;
     }
 
-    public function set_content(string|array|object $content): void
+    public function setContent(string|array|object $content): void
     {
         if (is_array($content) || is_object($content)) {
             $content = json_encode($content);

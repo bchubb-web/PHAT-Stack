@@ -33,6 +33,6 @@ class Resource implements Stringable {
 
     public function __toString(): string
     {
-        $this->get_content();
+        $this->getContent();
     }
 }
