@@ -16,13 +16,25 @@ class Route
         $this->route = $route;
     }
 
-    public function asNameSpace(): string
+    public function nameSpace(): string
     {
-        $route = "Pages" . $this->route . "/Page";
+        $route = "Pages" . $this->route;
 
         $route = str_replace("//", "/", $route);
+        $route = rtrim($route, "/");
         $route = str_replace("/", "\\", $route);
 
+
         return $route;
+    }
+
+    public function page(): string
+    {
+        return $this->nameSpace() . "\\Page";
+    }
+
+    public function hasLayout(): bool
+    {
+        return class_exists($this->nameSpace() . "\\Layout");
     }
 }

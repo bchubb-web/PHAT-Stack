@@ -26,6 +26,17 @@ class NsRouter
         $this->pages = array_keys($classes);
     }
 
+    public function determine(Route $route): void
+    {
+        if ($this->matches($route)) {
+            $this->match($route);
+        } else if ($this->matchesVar($route)) {
+            
+        } else {
+            $this->notFound();
+        }
+    }
+
     public function getPages(): array
     {
         return $this->pages;
@@ -33,12 +44,17 @@ class NsRouter
 
     public function matches(Route $route): bool
     {
-        return in_array($route->asNameSpace(), $this->pages);
+        return in_array($route->page(), $this->pages);
+    }
+
+    public function matchesVar(Route $route): bool
+    {
+        return false;
     }
 
     public function match(Route $route): void
     {
-        $class = $route->asNameSpace();
+        $class = $route->page();
         $pageClass = new $class;
 
         $pageClass->render();
