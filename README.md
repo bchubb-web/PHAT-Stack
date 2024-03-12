@@ -21,7 +21,7 @@ Obviously you must then add setup.php in the base of your project, to start, add
 ```php
 <?php
 
-require('../vendor/autoload.php');
+require('vendor/autoload.php');
 
 use bchubbweb\phntm\Routing\NsRouter;
 
