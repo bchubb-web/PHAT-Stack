@@ -2,7 +2,7 @@
 
 namespace bchubbweb\phntm\Routing;
 
-class NsRouter
+class Router
 {
     protected array $pages = [];
 
