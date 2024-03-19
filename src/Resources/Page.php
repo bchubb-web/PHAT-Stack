@@ -24,10 +24,10 @@ class Page extends Html {
         echo <<<HTML
         <html>
             <head>
-                { $assets }
+                $assets
             </head>
             <body>
-                { $body }
+                $body
             </body>
         </html>
         HTML;
