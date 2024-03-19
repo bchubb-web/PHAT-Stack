@@ -33,13 +33,16 @@ class Page extends Html {
         HTML;
     }
 
-    public function registerAsset(string $asset_url, ?string $type=null): bool
+    public function registerAsset(string $asset_url, ?string $type=null): void
     {
         $tag = '';
 
         if (!$type) {
-            $type = end(explode('.', $asset_url));
+            $parts = explode('.', $asset_url);
+            $type = end($parts);
         }
+
+        echo $type;
 
         switch ($type) {
             case 'js':
