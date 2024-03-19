@@ -26,6 +26,7 @@ class Router
      */
     public function __construct()
     {
+        exec('composer dumpautoload --optimize');
         $res = get_declared_classes();
         $autoloaderClassName = '';
         foreach ( $res as $className) {
