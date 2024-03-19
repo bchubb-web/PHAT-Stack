@@ -23,11 +23,11 @@ Obviously you must then add setup.php in the base of your project, to start, add
 
 require('vendor/autoload.php');
 
-use bchubbweb\phntm\Routing\NsRouter;
+use bchubbweb\phntm\Routing\Router;
 
-$router = new NsRouter();
+$router = new Router();
 
-$route = NsRouter::getRequestedRoute();
+$route = Router::getRequestedRoute();
 
 $router->determine($route);
 ```

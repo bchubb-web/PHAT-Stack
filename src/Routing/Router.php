@@ -1,11 +1,29 @@
 <?php
 
+/**
+ * @file Router.php
+ * Provides dynamic route handing
+ */
+
 namespace bchubbweb\phntm\Routing;
 
+/**
+ * Handles routing and pages
+ *
+ * gathers autoloaded classes from composer and checks route matches against 
+ * existing namespaces
+ */
 class Router
 {
+    /**
+     * Stores the possible namespaces
+     */
     protected array $pages = [];
 
+    /**
+     * Determine the composer autoloader, then filter out anything other than 
+     * the Pages\\ namespace
+     */
     public function __construct()
     {
         $res = get_declared_classes();
@@ -26,6 +44,12 @@ class Router
         $this->pages = array_keys($classes);
     }
 
+    /**
+     * Handles the matching process, static routes, then dynamic and 404 if not
+     *
+     * @param Route $route the given route
+     * @returns void
+     */
     public function determine(Route $route): void
     {
         if ($this->matches($route)) {
@@ -37,21 +61,41 @@ class Router
         }
     }
 
+    /**
+     * Return page list
+     *
+     * @returns string[]
+     */
     public function getPages(): array
     {
         return $this->pages;
     }
 
+    /**
+     * Determines if the route is an exact match with a namespace
+     *
+     * @returns bool
+     */
     public function matches(Route $route): bool
     {
         return in_array($route->page(), $this->pages);
     }
 
+    /**
+     * Determines if the route is a dynamic match with a variable namespace
+     *
+     * @returns bool
+     */
     public function matchesVar(Route $route): bool
     {
         return false;
     }
 
+    /**
+     * Select the given route
+     *
+     * @returns bool
+     */
     public function match(Route $route): void
     {
         $class = $route->page();
