@@ -19,9 +19,43 @@ class Page extends Html {
     }
     public function render(): void
     {
-        // todo echo wrapper, then head, then body, then layout, which inherits 
-        // from parent routes
-        echo $this->getContent();
+        $assets = $this->getAssets();
+        $body = $this->getContent();
+        echo <<<HTML
+        <html>
+            <head>
+                { $assets }
+            </head>
+            <body>
+                { $body }
+            </body>
+        </html>
+        HTML;
+    }
+
+    public function registerAsset(string $asset_url, ?string $type=null): bool
+    {
+        $tag = '';
+
+        if (!$type) {
+            $type = end(explode('.', $asset_url));
+        }
+
+        switch ($type) {
+            case 'js':
+                $tag = "<script src='{$asset_url}'></script>";
+                break;
+            case 'css':
+                $tag = "<link href='{$asset_url}'>";
+                break;
+        }
+
+        $this->assets[] = $tag;
+    }
+
+    public function getAssets(): string 
+    {
+        return implode('\n', $this->assets);
     }
 
 }
