@@ -42,14 +42,12 @@ class Page extends Html {
             $type = end($parts);
         }
 
-        echo $type;
-
         switch ($type) {
             case 'js':
                 $tag = "<script src='{$asset_url}'></script>";
                 break;
             case 'css':
-                $tag = "<link href='{$asset_url}'>";
+                $tag = "<link href='{$asset_url}' rel='stylesheet'>";
                 break;
         }
 
