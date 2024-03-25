@@ -2,9 +2,11 @@
 
 namespace bchubbweb\phntm\Routing;
 
-class Route 
+use Stringable;
+
+class Route implements Stringable
 {
-    protected string $route = '';
+    public string $route = '';
 
     public function __construct(string $requestRoute)
     {
@@ -13,7 +15,7 @@ class Route
 
     protected function setRoute(string $route): void
     {
-        $this->route = $route;
+        $this->route = str_replace('//', '/', $route);
     }
 
     public function nameSpace(): string
@@ -28,6 +30,14 @@ class Route
         return $route;
     }
 
+    public function parentNamespace(): string
+    {
+        $thisNamespace = $this->nameSpace();
+        $parts = explode("\\", $thisNamespace);
+        array_pop($parts);
+        return implode("\\", $parts);
+    }
+
     public function page(): string
     {
         return $this->nameSpace() . "\\Page";
@@ -37,4 +47,19 @@ class Route
     {
         return class_exists($this->nameSpace() . "\\Layout");
     }
+
+    public function hasDynamic(): bool
+    {
+        return class_exists($this->nameSpace() . "\\DynamicRoute");
+    }
+
+    public function dynamicPage(): string
+    {
+        return $this->parentNamespace() . "\\DynamicRoute";
+    }
+
+    public function __toString(): string
+    {
+        return $this->route;
+    } 
 }
