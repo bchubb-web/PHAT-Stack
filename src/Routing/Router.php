@@ -7,6 +7,11 @@
 
 namespace bchubbweb\phntm\Routing;
 
+use ReflectionClass;
+use SplStack;
+use TypeError;
+
+
 /**
  * Handles routing and pages
  *
@@ -19,6 +24,26 @@ class Router
      * Stores the possible namespaces
      */
     protected array $pages = [];
+
+    /**
+     * Stores any dynamic values in the route
+     */
+    protected array $dynamicRouteParts = [];
+
+    /**
+     * Stores the last popped route part when determining a dynamic route
+     */
+    protected string $lastCheckedRoutePart = '';
+
+    /**
+     * best suited namespace for requested route
+     */
+    protected string $bestMatch = '';
+
+    /**
+     * Parameters to pass to the page
+     */
+    protected array $params = [];
 
     /**
      * Determine the composer autoloader, then filter out anything other than 
@@ -53,13 +78,11 @@ class Router
      */
     public function determine(Route $route): void
     {
-        if ($this->matches($route)) {
-            $this->match($route);
-        } else if ($this->matchesVar($route)) {
-            
-        } else {
-            $this->notFound();
+        if (!$this->matches($route)) {
+            $this->dynamicMatches($route);
         }
+
+        $this->match($this->bestMatch, $this->params);
     }
 
     /**
@@ -79,7 +102,18 @@ class Router
      */
     public function matches(Route $route): bool
     {
-        return in_array($route->page(), $this->pages);
+        if (str_contains($route->route, '/_')) {
+            echo 'nope';
+            return false;
+        }
+        if (!in_array($route->page(), $this->pages)) {
+            return false;
+        }
+        $this->bestMatch = $route->page();
+        $this->params = [];
+
+        echo 'best match: ' . $this->bestMatch;
+        return true;
     }
 
     /**
@@ -87,21 +121,62 @@ class Router
      *
      * @returns bool
      */
-    public function matchesVar(Route $route): bool
+    public function dynamicMatches(Route $route): bool
     {
+        //$parts = explode('/', $route);
+        $parts = explode('\\', $route->nameSpace());
+        array_shift($parts);
+        $routeDepth = count($parts);
+
+        for ( $i=$routeDepth-1; $i>=0; $i-- ) {
+            //remove and store the current namespace part
+            $this->lastCheckedRoutePart = array_pop($parts);
+
+
+            // filter possible namespaces from the pages array
+            $filtered = array_filter($this->pages, function($page) use ($parts, $route) {
+
+                // current namespace without dynamic parameter
+                $currentNs = "Pages\\" . implode("\\", $parts);
+
+                // current number of parts in the namespace matches the current page
+                $filteredPageDepth = substr_count($page, '\\');
+                // add 2, one for the Pages\ and one for the Page
+                $thisDepth = count($parts) + 2;
+
+                return ($filteredPageDepth === $thisDepth && substr($page, 0, strlen($currentNs)) === $currentNs );
+            });
+
+            // reset indexes and select first
+            $filtered = array_values($filtered)[0];
+
+            if (!class_exists( $filtered )) {
+                continue;
+            }
+
+            $refelctedClass = new ReflectionClass( $filtered );
+            $param = $refelctedClass->getConstructor()->getParameters()[0];
+
+            $dynamicParam = new DynamicParameter($this->lastCheckedRoutePart, $param->getType());
+            $this->params[] = $dynamicParam->value;
+            $this->bestMatch = $filtered;
+            return true;
+        }
+        $this->params = [];
+        $this->bestMatch = "Pages\\NotFound";
         return false;
     }
 
     /**
      * Select the given route
      *
+     * @param Route $route the given route
+     * @param array $params the parameters to pass to the page
      * @returns bool
      */
-    public function match(Route $route): void
+    public function match(string $bestMatch, array $params=[]): void
     {
-        $class = $route->page();
-        $pageClass = new $class;
-
+        $pageClass = new $bestMatch(...$params);
         $pageClass->render();
     }
 
@@ -120,11 +195,11 @@ class Router
         return $route;
     }
 
-    public function notFound(): void
+    /*public function notFound(): void
     {
         $notFound = "Pages\\NotFound";
         $pageClass = new $notFound;
 
         $pageClass->render();
-    }
+    }*/
 }
