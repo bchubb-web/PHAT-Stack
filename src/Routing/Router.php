@@ -23,11 +23,6 @@ class Router
     protected array $pages = [];
 
     /**
-     * Stores any dynamic values in the route
-     */
-    protected array $dynamicRouteParts = [];
-
-    /**
      * Stores the last popped route part when determining a dynamic route
      */
     protected string $lastCheckedRoutePart = '';
