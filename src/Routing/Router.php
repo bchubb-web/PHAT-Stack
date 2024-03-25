@@ -8,9 +8,6 @@
 namespace bchubbweb\phntm\Routing;
 
 use ReflectionClass;
-use SplStack;
-use TypeError;
-
 
 /**
  * Handles routing and pages
