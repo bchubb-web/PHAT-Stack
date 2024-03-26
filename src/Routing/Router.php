@@ -23,6 +23,16 @@ class Router
     protected array $pages = [];
 
     /**
+     * Stores the static pages
+     */
+    protected array $staticPages = [];
+
+    /**
+     * Stores the dynamic pages
+     */
+    protected array $dynamicPages = [];
+
+    /**
      * Stores the last popped route part when determining a dynamic route
      */
     protected string $lastCheckedRoutePart = '';
@@ -48,7 +58,7 @@ class Router
         $autoloaderClassName = '';
         foreach ( $res as $className) {
             if (strpos($className, 'ComposerAutoloaderInit') === 0) {
-                $autoloaderClassName = $className; // ComposerAutoloaderInit323a579f2019d15e328dd7fec58d8284 for me
+                $autoloaderClassName = $className;
                 break;
             }
         }
@@ -60,6 +70,14 @@ class Router
         }, ARRAY_FILTER_USE_KEY);
 
         $this->pages = array_keys($classes);
+
+        $this->staticPages = array_filter($this->pages, function($page) {
+            return !str_contains($page, "\\_");
+        });
+
+        $this->dynamicPages = array_filter($this->pages, function($page) {
+            return str_contains($page, "\\_");
+        });
     }
 
     /**
@@ -94,17 +112,12 @@ class Router
      */
     public function matches(Route $route): bool
     {
-        if (str_contains($route->route, '/_')) {
-            echo 'nope';
-            return false;
-        }
-        if (!in_array($route->page(), $this->pages)) {
+        if (!in_array($route->page(), $this->staticPages)) {
             return false;
         }
         $this->bestMatch = $route->page();
         $this->params = [];
 
-        echo 'best match: ' . $this->bestMatch;
         return true;
     }
 
@@ -115,45 +128,72 @@ class Router
      */
     public function dynamicMatches(Route $route): bool
     {
-        //$parts = explode('/', $route);
-        $parts = explode('\\', $route->nameSpace());
-        array_shift($parts);
-        $routeDepth = count($parts);
 
-        for ( $i=$routeDepth-1; $i>=0; $i-- ) {
-            //remove and store the current namespace part
-            $this->lastCheckedRoutePart = array_pop($parts);
+        $requestParts = explode('\\', $route->nameSpace());
+        array_shift($requestParts);
+
+        $correctDepthNamespaces = array_values(array_filter($this->dynamicPages, function($page) use ($requestParts) {
+            return substr_count($page, '\\') === count($requestParts) + 1;
+        }));
 
 
-            // filter possible namespaces from the pages array
-            $filtered = array_filter($this->pages, function($page) use ($parts, $route) {
 
-                // current namespace without dynamic parameter
-                $currentNs = "Pages\\" . implode("\\", $parts);
+        $applicableRoutes = array_map(function($page) {
+            $route = [];
+            $route['namespace'] = $page;
+            $parts = explode('\\', $page);
+            array_shift($parts);
+            array_pop($parts);
 
-                // current number of parts in the namespace matches the current page
-                $filteredPageDepth = substr_count($page, '\\');
-                // add 2, one for the Pages\ and one for the Page
-                $thisDepth = count($parts) + 2;
-
-                return ($filteredPageDepth === $thisDepth && substr($page, 0, strlen($currentNs)) === $currentNs );
+            $route['static_parts'] = array_filter($parts, function($part) {
+                return $part[0] !== '_';
             });
 
-            // reset indexes and select first
-            $filtered = array_values($filtered)[0];
+            $route['dynamic_parts'] = array_filter($parts, function($part) {
+                return $part[0] === '_';
+            });
 
-            if (!class_exists( $filtered )) {
-                continue;
+            return $route;
+        }, $correctDepthNamespaces);
+
+
+        usort($applicableRoutes, function($a, $b) {
+            return count($a['dynamic_parts']) <=> count($b['dynamic_parts']);
+        });
+
+       
+        foreach ($applicableRoutes as $possibleRoute) {
+            $checkedParts = [];
+            foreach ($possibleRoute['static_parts'] as $i => $part) {
+                if ($part === $requestParts[$i]) {
+                    $checkedParts[$i] = $part;
+                }
             }
+            foreach ($possibleRoute['dynamic_parts'] as $i => $part) {
+                if (!isset($checkedParts[$i])) {
+                    $checkedParts[$i] = $requestParts[$i];
+                }
+            }
+            ksort($checkedParts);
+            if ($checkedParts === $requestParts) {
 
-            $refelctedClass = new ReflectionClass( $filtered );
-            $param = $refelctedClass->getConstructor()->getParameters()[0];
+                // build the parameters
+                $reflectedParams = (new ReflectionClass($possibleRoute['namespace']))->getConstructor()->getParameters();
 
-            $dynamicParam = new DynamicParameter($this->lastCheckedRoutePart, $param->getType());
-            $this->params[] = $dynamicParam->value;
-            $this->bestMatch = $filtered;
-            return true;
+                $constructorParamIndex = 0;
+
+                foreach ($possibleRoute['dynamic_parts'] as $i => $_) {
+                    $dynamicParam = new DynamicParameter($requestParts[$i], $reflectedParams[$constructorParamIndex]->getType());
+                    $this->params[] = $dynamicParam->value;
+                    $constructorParamIndex++;
+                }
+
+                $this->bestMatch = $possibleRoute['namespace'];
+
+                return true;
+            }
         }
+
         $this->params = [];
         $this->bestMatch = "Pages\\NotFound";
         return false;
@@ -186,12 +226,4 @@ class Router
 
         return $route;
     }
-
-    /*public function notFound(): void
-    {
-        $notFound = "Pages\\NotFound";
-        $pageClass = new $notFound;
-
-        $pageClass->render();
-    }*/
 }

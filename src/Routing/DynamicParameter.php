@@ -7,7 +7,6 @@ use Stringable;
 class DynamicParameter implements Stringable
 {
     public mixed $value;
-    public string $type;
 
     public function __construct(mixed $value, string $type)
     {
