@@ -2,6 +2,8 @@
 
 namespace bchubbweb\phntm\Resources;
 
+use bchubbweb\phntm\Profiling\Profiler;
+
 class Page extends Html {
 
     public array $headers = [];
@@ -10,6 +12,7 @@ class Page extends Html {
 
     public function __construct()
     {
+        Profiler::flag(__NAMESPACE__ . '\Page::__construct()');
         parent::__construct();
     }
 
@@ -19,6 +22,7 @@ class Page extends Html {
     }
     public function render(): void
     {
+        Profiler::flag(__NAMESPACE__ . '\Page::render()');
         $assets = $this->getAssets();
         $body = $this->getContent();
         echo <<<HTML

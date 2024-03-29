@@ -74,3 +74,17 @@ class Page extends PageTemplate
     }
 }
 ```
+
+## Profiling
+
+To use the phntm profiler simply call the flag method on bchubbweb\phntm\Profiler\Profiler, and then Profiler::dump() to output the profiling information at a given point.
+```php
+
+use bchubbweb\phntm\Profiler\Profiler;
+
+Profiler::flag('start');
+sleep(1);
+Profiler::flag('end');
+
+Profiler::dump();
+```

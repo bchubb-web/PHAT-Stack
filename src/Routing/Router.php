@@ -8,6 +8,7 @@
 namespace bchubbweb\phntm\Routing;
 
 use ReflectionClass;
+use bchubbweb\phntm\Profiling\Profiler;
 
 /**
  * Handles routing and pages
@@ -53,7 +54,29 @@ class Router
      */
     public function __construct()
     {
-        exec('composer dumpautoload --optimize');
+        Profiler::flag("Start Autoload");
+        $classes = $this->autoload();
+
+        if (empty($classes)) {
+            Profiler::flag("exec(\"composer dumpautoload --optimize\")");
+            exec('composer dumpautoload --optimize');
+            $classes = $this->autoload();
+        }
+        Profiler::flag("Autoloaded classes");
+
+        $this->pages = array_keys($classes);
+
+        $this->staticPages = array_filter($this->pages, function($page) {
+            return !str_contains($page, "\\_");
+        });
+
+        $this->dynamicPages = array_filter($this->pages, function($page) {
+            return str_contains($page, "\\_");
+        });
+    }
+
+    protected function autoload() {
+
         $res = get_declared_classes();
         $autoloaderClassName = '';
         foreach ( $res as $className) {
@@ -69,15 +92,7 @@ class Router
             return (strpos($key, "Pages\\") === 0);
         }, ARRAY_FILTER_USE_KEY);
 
-        $this->pages = array_keys($classes);
-
-        $this->staticPages = array_filter($this->pages, function($page) {
-            return !str_contains($page, "\\_");
-        });
-
-        $this->dynamicPages = array_filter($this->pages, function($page) {
-            return str_contains($page, "\\_");
-        });
+        return $classes;
     }
 
     /**
@@ -88,11 +103,15 @@ class Router
      */
     public function determine(Route $route): void
     {
+        Profiler::flag("Start determination");
         if (!$this->matches($route)) {
+            Profiler::flag("No static route matches found, matching against dynamic routes");
             $this->dynamicMatches($route);
         }
+        Profiler::flag("End determination");
 
         $this->match($this->bestMatch, $this->params);
+        //Profiler::dump();
     }
 
     /**
@@ -208,8 +227,10 @@ class Router
      */
     public function match(string $bestMatch, array $params=[]): void
     {
+        Profiler::flag("Matched route: $bestMatch, with params: " . implode(', ', $params));
         $pageClass = new $bestMatch(...$params);
         $pageClass->render();
+
     }
 
     public static function getRequestedRoute(): Route 
