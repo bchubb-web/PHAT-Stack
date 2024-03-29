@@ -14,7 +14,7 @@ final class Phntm
 
     private function __construct()
     {
-        $this->config = Config::get('config');
+
     }
 
     /**
@@ -28,11 +28,6 @@ final class Phntm
             self::$instance = new Phntm();
         }
         return self::$instance;
-    }
-
-    public function getConfig(): array
-    {
-        return $this->config;
     }
 
     /**

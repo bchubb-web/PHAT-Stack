@@ -9,6 +9,7 @@ namespace bchubbweb\phntm\Routing;
 
 use ReflectionClass;
 use bchubbweb\phntm\Profiling\Profiler;
+use Predis\Client;
 
 /**
  * Handles routing and pages
@@ -48,6 +49,12 @@ class Router
      */
     protected array $params = [];
 
+
+    /**
+     * Stores the Redis client
+     */
+    protected ?Client $redis = null;
+
     /**
      * Determine the composer autoloader, then filter out anything other than 
      * the Pages\\ namespace
@@ -55,6 +62,9 @@ class Router
     public function __construct()
     {
         Profiler::flag("Start Autoload");
+
+        $this->redis = new Client();
+
         $classes = $this->autoload();
 
         if (empty($classes)) {
@@ -75,8 +85,10 @@ class Router
         });
     }
 
-    protected function autoload() {
-
+protected function autoload(): array
+{
+        $cachedPages = $this->redis->get('pages');
+        var_dump($cachedPages);
         $res = get_declared_classes();
         $autoloaderClassName = '';
         foreach ( $res as $className) {
