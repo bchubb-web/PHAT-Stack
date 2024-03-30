@@ -44,18 +44,17 @@ final class Phntm
         return self::$routerInstance;
     }
     /**
-     * Start the profiler, returns false if the profiler is already running
+     * Start the profiler, or return the existing instance
      *
-     * @return bool
+     * @return Profiler
      */
-    public static function Profile(): bool
+    public static function Profile(): Profiler
     {
         if (null === self::$profilerInstance) {
             self::$profilerInstance = new Profiler();
             self::$profilerInstance->start();
-            return true;
         }
-        return false;
+        return self::$profilerInstance;
     }
 
     /**

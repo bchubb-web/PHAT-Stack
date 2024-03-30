@@ -131,7 +131,6 @@ protected function autoload(): array
         Profiler::flag("End determination");
 
         $this->match($this->bestMatch, $this->params);
-        //Profiler::dump();
     }
 
     /**

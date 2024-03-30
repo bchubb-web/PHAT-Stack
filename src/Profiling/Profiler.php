@@ -9,17 +9,22 @@ class Profiler
     protected static array $entries = [];
     protected static array $names = [];
     public static bool $console = false;
+    public static bool $started = false;
 
     public static function start($console = false): void
     {
         self::$console = $console;
         self::$entries = [];
         self::$names = [];
+        self::$started = true;
         Profiler::flag('start');
     }
 
     public static function flag($message=''): void
     {
+        if (!self::$started) {
+            return;
+        }
         $time = microtime(true);
         self::$entries[] = new Entry($message, $time);
         self::$names[] = $message;
@@ -27,6 +32,9 @@ class Profiler
 
     public static function dump(): void
     {
+        if (!self::$started) {
+            return;
+        }
         if (self::$console) {
             self::dumpConsole();
         } else {
@@ -63,11 +71,6 @@ class Profiler
         }
         echo "<tr><td>" . self::$entries[$size-1]->parent . "</td><td>" . self::$entries[$size-1]->message . "</td><td>n/a</td></tr></tbody></table>";
         echo '</dialog>';
-    }
-
-    public static function entry($name)
-    {
-        self::$timing[$name] = microtime(true);
     }
 }
 
