@@ -9,6 +9,8 @@ namespace bchubbweb\phntm\Routing;
 
 use ReflectionClass;
 use bchubbweb\phntm\Profiling\Profiler;
+use Predis\Client;
+use bchubbweb\phntm\Phntm;
 
 /**
  * Handles routing and pages
@@ -48,6 +50,12 @@ class Router
      */
     protected array $params = [];
 
+
+    /**
+     * Stores the Redis client
+     */
+    protected ?Client $redis = null;
+
     /**
      * Determine the composer autoloader, then filter out anything other than 
      * the Pages\\ namespace
@@ -55,6 +63,9 @@ class Router
     public function __construct()
     {
         Profiler::flag("Start Autoload");
+
+        $this->redis = Phntm::Redis();
+
         $classes = $this->autoload();
 
         if (empty($classes)) {
@@ -75,22 +86,31 @@ class Router
         });
     }
 
-    protected function autoload() {
-
-        $res = get_declared_classes();
-        $autoloaderClassName = '';
-        foreach ( $res as $className) {
-            if (strpos($className, 'ComposerAutoloaderInit') === 0) {
-                $autoloaderClassName = $className;
-                break;
+protected function autoload(): array
+{
+        $cachedPages = $this->redis->get('pages');
+        if ( null === $cachedPages) {
+            $res = get_declared_classes();
+            $autoloaderClassName = '';
+            foreach ( $res as $className) {
+                if (strpos($className, 'ComposerAutoloaderInit') === 0) {
+                    $autoloaderClassName = $className;
+                    break;
+                }
             }
-        }
-        $classLoader = $autoloaderClassName::getLoader();
-        $classes = $classLoader->getClassMap();
+            $classLoader = $autoloaderClassName::getLoader();
+            $classes = $classLoader->getClassMap();
 
-        $classes = array_filter($classes, function($key) {
-            return (strpos($key, "Pages\\") === 0);
-        }, ARRAY_FILTER_USE_KEY);
+            $classes = array_filter($classes, function($key) {
+                return (strpos($key, "Pages\\") === 0);
+            }, ARRAY_FILTER_USE_KEY);
+
+            $this->redis->set('pages', serialize($classes), 'EX', 30);
+            Profiler::flag("Autoloaded classes from composer");
+        } else {
+            $classes = unserialize($cachedPages);
+            Profiler::flag("Autoloaded classes from Redis cache");
+        }
 
         return $classes;
     }

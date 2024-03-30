@@ -4,17 +4,18 @@ namespace bchubbweb\phntm;
 
 use bchubbweb\phntm\Routing\Router;
 use bchubbweb\phntm\Profiling\Profiler;
+use Predis\Client;
 
 final class Phntm
 {
     private static ?Phntm $instance = null;
     private static ?Router $routerInstance = null;
     private static ?Profiler $profilerInstance = null;
-    private $config = [];
+    private static ?Client $predisInstance = null;
 
     private function __construct()
     {
-        $this->config = Config::get('config');
+
     }
 
     /**
@@ -28,11 +29,6 @@ final class Phntm
             self::$instance = new Phntm();
         }
         return self::$instance;
-    }
-
-    public function getConfig(): array
-    {
-        return $this->config;
     }
 
     /**
@@ -60,5 +56,18 @@ final class Phntm
             return true;
         }
         return false;
+    }
+
+    /**
+     * return the Predis singleton instance
+     *
+     * @return Client
+     */
+    public static function Redis(): Client
+    {
+        if (null === self::$predisInstance) {
+            self::$predisInstance = new Client();
+        }
+        return self::$predisInstance;
     }
 }
