@@ -13,12 +13,19 @@ class Route implements Stringable
         $this->setRoute($requestRoute);
     }
 
+    public static function fromNamespace(string $namespace): Route
+    {
+        $route = str_replace("Pages", "", $namespace);
+        $route = str_replace("\\", "/", $route);
+        return new Route($route);
+    }
+
     protected function setRoute(string $route): void
     {
         $this->route = str_replace('//', '/', $route);
     }
 
-    public function nameSpace(): string
+    public function namespace(): string
     {
         $route = "Pages" . $this->route;
 
@@ -26,36 +33,45 @@ class Route implements Stringable
         $route = rtrim($route, "/");
         $route = str_replace("/", "\\", $route);
 
+        if (str_ends_with($route, "\\Page")) {
+            $route = substr($route, 0, -5);
+        }
+
 
         return $route;
     }
 
     public function parentNamespace(): string
     {
-        $thisNamespace = $this->nameSpace();
+        $thisNamespace = $this->namespace();
         $parts = explode("\\", $thisNamespace);
         array_pop($parts);
         return implode("\\", $parts);
     }
 
+    public function parent(): Route
+    {
+        return Route::fromNamespace($this->parentNamespace());
+    }
+
+    public function isRoot(): bool
+    {
+        return $this->namespace() === "Pages";
+    }
+
     public function page(): string
     {
-        return $this->nameSpace() . "\\Page";
+        return $this->namespace() . "\\Page";
+    }
+
+    public function layout(): string
+    {
+        return $this->namespace() . "\\Layout";
     }
 
     public function hasLayout(): bool
     {
-        return class_exists($this->nameSpace() . "\\Layout");
-    }
-
-    public function hasDynamic(): bool
-    {
-        return class_exists($this->nameSpace() . "\\DynamicRoute");
-    }
-
-    public function dynamicPage(): string
-    {
-        return $this->parentNamespace() . "\\DynamicRoute";
+        return class_exists($this->layout());
     }
 
     public function __toString(): string

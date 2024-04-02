@@ -3,12 +3,16 @@
 namespace bchubbweb\phntm\Resources;
 
 use bchubbweb\phntm\Profiling\Profiler;
+use bchubbweb\phntm\Routing\Route;
+use bchubbweb\phntm\Resources\Assets\Asset;
 
 class Page extends Html {
 
     public array $headers = [];
 
     public array $assets = [];
+
+    public ?Layout $layout;
 
     public function __construct()
     {
@@ -22,45 +26,59 @@ class Page extends Html {
     }
     public function render(): void
     {
-        Profiler::flag(__NAMESPACE__ . '\Page::render()');
-        $assets = $this->getAssets();
-        $body = $this->getContent();
-        echo <<<HTML
-        <html>
-            <head>
-                $assets
-            </head>
-            <body>
-                $body
-            </body>
-        </html>
-        HTML;
+        Profiler::flag("Rendering page content");
+        echo $this->getContent();
     }
 
-    public function registerAsset(string $asset_url, ?string $type=null): void
+    public function registerAsset(Asset | string $asset_url, ?string $type=null): void
     {
-        $tag = '';
-
-        if (!$type) {
-            $parts = explode('.', $asset_url);
-            $type = end($parts);
+        if (is_string($asset_url)) {
+            $asset_url = new Asset($asset_url);
         }
-
-        switch ($type) {
-            case 'js':
-                $tag = "<script src='{$asset_url}'></script>";
-                break;
-            case 'css':
-                $tag = "<link href='{$asset_url}' rel='stylesheet'>";
-                break;
-        }
-
-        $this->assets[] = $tag;
+        $this->assets[] = $asset_url;
     }
 
-    public function getAssets(): string 
+    public function registerAssets(array $assets): void
     {
-        return implode('\n', $this->assets);
+        foreach ($assets as $asset) {
+            $this->registerAsset($asset);
+        }
     }
 
+    public function getAssets(): string
+    {
+        $assets = '';
+        foreach ($this->assets as $asset) {
+            $assets .= $asset . "\n";
+        }
+        return $assets;
+    }
+
+    public function layout(Route $layoutRoute): Page
+    {
+        $layoutClass = $layoutRoute->layout();
+
+        $this->layout = new $layoutClass();
+
+        $this->layout->registerAssets($this->assets);
+
+        $this->wrapContent($this->layout->getWrap());
+
+        return $this;
+    }
+
+
+    /**
+     * Wrap the content with the layout before and after content
+     *
+     * @param array<string> $parts
+     * @return void
+    */
+    public function wrapContent(array $parts): void
+    {
+        $content = $parts[0];
+        $content .= $this->getContent();
+        $content .= $parts[1];
+        $this->setContent($content);
+    }
 }
