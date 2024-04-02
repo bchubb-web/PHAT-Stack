@@ -21,15 +21,19 @@ Obviously you must then add setup.php in the base of your project, to start, add
 ```php
 <?php
 
+namespace bchubbweb\PhntmImplementation;
+
 require('vendor/autoload.php');
 
-use bchubbweb\phntm\Routing\Router;
+use bchubbweb\phntm\Phntm;
 
-$router = new Router();
+//Phntm::Profile();
+$router = Phntm::Router();
 
-$route = Router::getRequestedRoute();
+$route = $router::getRequestedRoute();
 
 $router->determine($route);
+//Phntm::Profile()::dump();
 ```
 
 This will set up the namespace router, and determine what to do with the current request.
