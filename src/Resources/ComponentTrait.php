@@ -2,7 +2,7 @@
 
 namespace bchubbweb\phntm\Resources;
 
-trait Component
+trait ComponentTrait
 {
     private string $content = "";
 
