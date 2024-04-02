@@ -6,7 +6,7 @@ use bchubbweb\phntm\Profiling\Profiler;
 use bchubbweb\phntm\Routing\Route;
 use bchubbweb\phntm\Resources\Assets\Asset;
 
-class Page extends Html {
+class Page extends Html implements ContentRenderable { 
 
     public array $headers = [];
 
