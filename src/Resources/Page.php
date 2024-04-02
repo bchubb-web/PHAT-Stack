@@ -2,7 +2,7 @@
 
 namespace bchubbweb\phntm\Resources;
 
-class Page extends Html {
+class Page extends Html implements ContentRenderable { 
 
     public array $headers = [];
 
