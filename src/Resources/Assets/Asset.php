@@ -2,29 +2,41 @@
 
 namespace bchubbweb\phntm\Resources\Assets;
 
+use Stringable;
 use bchubbweb\phntm\Resources\ContentTypeTrait;
 
-class Asset {
+class Asset implements Stringable {
 
     use ContentTypeTrait;
+
+    public string $tag = ''; 
 
     public string $uri = '';
 
     public string $content = '';
 
-    public function getContent(): string
+    public function __construct(string $uri)
     {
-        return $this->content;
+        $this->tag = $this->generateTag($uri);
     }
 
-    public function setContent(string|array|object $content): void
+    public function generateTag(string $uri): string
     {
-        if (is_array($content) || is_object($content)) {
-            $content = json_encode($content);
-        } else if (is_string($content) && !json_validate($content)) {
-            throw new \Exception('Invalid Json');
-        }
+        $parts = explode('.', $uri);
+        $type = end($parts);
 
-        $this->content = $content;
+        switch ($type) {
+            case 'js':
+                return "<script src='{$uri}'></script>";
+            case 'css':
+                return "<link href='{$uri}' rel='stylesheet'>";
+            default:
+                return '';
+        }
+    }
+
+    public function __toString(): string
+    {
+        return $this->tag;
     }
 }

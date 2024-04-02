@@ -1,16 +1,16 @@
 {
-    "name": "bchubbweb/phntm",
+    "name": "Bchubbweb/Phntm",
     "description": "A server side stack, focused on DX and simplicity",
     "type": "project",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "bchubbweb\\phntm\\": "src/"
+            "Bchubbweb\\Phntm\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "bchubbweb\\phntm\\tests\\": "tests/"
+            "Bchubbweb\\Phntm\\Tests\\": "tests/"
         }
     },
     "authors": [
@@ -22,5 +22,9 @@
     "minimum-stability": "stable",
     "require-dev": {
         "phpunit/phpunit": "^11.0"
+    },
+    "require": {
+        "predis/predis": "^2.2",
+        "league/container": "^4.2"
     }
 }
