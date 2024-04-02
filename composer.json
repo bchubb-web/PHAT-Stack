@@ -1,16 +1,16 @@
 {
-    "name": "bchubbweb/phntm",
+    "name": "Bchubbweb/Phntm",
     "description": "A server side stack, focused on DX and simplicity",
     "type": "project",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "bchubbweb\\phntm\\": "src/"
+            "Bchubbweb\\Phntm\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "bchubbweb\\phntm\\tests\\": "tests/"
+            "Bchubbweb\\Phntm\\Tests\\": "tests/"
         }
     },
     "authors": [

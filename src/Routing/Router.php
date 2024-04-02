@@ -11,6 +11,7 @@ use ReflectionClass;
 use bchubbweb\phntm\Profiling\Profiler;
 use Predis\Client;
 use bchubbweb\phntm\Phntm;
+use bchubbweb\phntm\Routing\Page;
 
 /**
  * Handles routing and pages
@@ -20,6 +21,9 @@ use bchubbweb\phntm\Phntm;
  */
 class Router
 {
+    protected const AUTOLOAD_CLASS_CACHE_KEY = 'phntm_autoloaded_classes';
+    protected const TITLES_CACHE_ID = 'accredited_course_category_titles';
+
     /**
      * Stores the possible namespaces
      */
@@ -73,7 +77,7 @@ class Router
             exec('composer dumpautoload --optimize');
             $classes = $this->autoload();
         }
-        Profiler::flag("Autoloaded classes");
+        Profiler::flag("End Autoload");
 
         $this->pages = array_keys($classes);
 
@@ -86,9 +90,14 @@ class Router
         });
     }
 
-protected function autoload(): array
-{
-        $cachedPages = $this->redis->get('pages');
+    /**
+     * Autoloads the classes from composer or cache
+     *
+     * @returns array
+     */
+    protected function autoload(): array
+    {
+        $cachedPages = $this->redis->get(static::AUTOLOAD_CLASS_CACHE_KEY);
         if ( null === $cachedPages) {
             $res = get_declared_classes();
             $autoloaderClassName = '';
@@ -105,7 +114,7 @@ protected function autoload(): array
                 return (strpos($key, "Pages\\") === 0);
             }, ARRAY_FILTER_USE_KEY);
 
-            $this->redis->set('pages', serialize($classes), 'EX', 30);
+            $this->redis->set(static::AUTOLOAD_CLASS_CACHE_KEY, serialize($classes), 'EX', 30);
             Profiler::flag("Autoloaded classes from composer");
         } else {
             $classes = unserialize($cachedPages);
@@ -167,7 +176,7 @@ protected function autoload(): array
     public function dynamicMatches(Route $route): bool
     {
 
-        $requestParts = explode('\\', $route->nameSpace());
+        $requestParts = explode('\\', $route->namespace());
         array_shift($requestParts);
 
         $correctDepthNamespaces = array_values(array_filter($this->dynamicPages, function($page) use ($requestParts) {
@@ -247,7 +256,16 @@ protected function autoload(): array
     public function match(string $bestMatch, array $params=[]): void
     {
         Profiler::flag("Matched route: $bestMatch, with params: " . implode(', ', $params));
+
+        $layoutRoute = $this->detectLayout($bestMatch);
+
+        /** @var Page $pageClass */
         $pageClass = new $bestMatch(...$params);
+
+        if ($layoutRoute) { 
+            $pageClass->layout($layoutRoute);
+        }
+
         $pageClass->render();
 
     }
@@ -257,13 +275,43 @@ protected function autoload(): array
         $uri = explode('?', $_SERVER['REQUEST_URI'])[0];
         $uriParts = explode('/', $uri);
 
-        $uriFormatted = '/' . implode('/', 
-            array_map(function ($part) {
-                return ucfirst($part);
-            }, $uriParts));
+        $uriFormatted = '/' . implode('/', array_map(function ($part) { return ucfirst($part); }, $uriParts));
 
         $route = new Route($uriFormatted);
 
         return $route;
+    }
+
+    public function detectLayout(string $bestMatch): Route | false
+    {
+        if (!$pageRoute = Route::fromNamespace($bestMatch)) {
+            return false;
+        }
+
+        if ($pageRoute->hasLayout()) {
+            Profiler::flag("Layout found at: " . $pageRoute->layout());
+            return $pageRoute;
+        }
+
+        // negate the loop if the page is the root
+        if ($pageRoute->isRoot()) {
+            return false;
+        }
+
+        $found = false;
+        while (!$pageRoute->isRoot() && !$found) {
+            $pageRoute = $pageRoute->parent();
+            if ($pageRoute->hasLayout()) {
+                $found = true;
+                break;
+            }
+        }
+
+        if ($found) {
+            Profiler::flag("Layout found at: " . $pageRoute->layout());
+            return $pageRoute;
+        }
+
+        return $found;
     }
 }
