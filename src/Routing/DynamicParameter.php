@@ -38,7 +38,6 @@ class DynamicParameter implements Stringable
         }
 
         settype($value, $type);
-        $this->value = $value;
     }
 
     public function __toString(): string

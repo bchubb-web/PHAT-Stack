@@ -8,6 +8,7 @@
 namespace bchubbweb\phntm\Routing;
 
 use ReflectionClass;
+use bchubbweb\phntm\Routing\ParameterTypeException;
 use Predis\Client;
 use bchubbweb\phntm\Phntm;
 use bchubbweb\phntm\Resources\Page;
@@ -93,7 +94,7 @@ class Router
     /**
      * Autoloads the classes from composer or cache
      *
-     * @returns array
+     * @returns array<string>
      */
     protected function autoload(): array
     {
@@ -148,7 +149,7 @@ class Router
     /**
      * Return page list
      *
-     * @returns string[]
+     * @returns array<string>
      */
     public function getPages(): array
     {
@@ -232,12 +233,19 @@ class Router
 
                 $constructorParamIndex = 0;
 
+                $typeSafe = true;
+                $safeParams = [];
                 foreach ($possibleRoute['dynamic_parts'] as $i => $_) {
-                    $dynamicParam = new DynamicParameter($requestParts[$i], $reflectedParams[$constructorParamIndex]->getType());
-                    $this->params[] = $dynamicParam->value;
-                    $constructorParamIndex++;
+                    try {
+                        $dynamicParam = new DynamicParameter($requestParts[$i], $reflectedParams[$constructorParamIndex]->getType());
+                        $safeParams[] = $dynamicParam->value;
+                        $constructorParamIndex++;
+                    } catch ( ParameterTypeException $e) {
+                        break 2;
+                    }
                 }
 
+                $this->params = $safeParams;
                 $this->bestMatch = $possibleRoute['namespace'];
 
                 return true;
