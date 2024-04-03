@@ -14,10 +14,10 @@ Create a .htaccess file with the following contents at the base of your project
 ```
 RewriteEngine On
 RewriteCond %{REQUEST_URI}  !(\.png|\.jpg|\.webp|\.gif|\.jpeg|\.zip|\.css|\.svg|\.js|\.pdf|\.ttf)$
-RewriteRule (.*) setup.php [QSA,L]
+RewriteRule (.*) index.php [QSA,L]
 ```
 
-Obviously you must then add setup.php in the base of your project, to start, add the following contents:
+Obviously you must then add index.php in the base of your project, to start, add the following contents:
 ```php
 <?php
 
@@ -27,26 +27,22 @@ require('vendor/autoload.php');
 
 use bchubbweb\phntm\Phntm;
 
-//Phntm::Profile();
-$router = Phntm::Router();
-
-$route = $router::getRequestedRoute();
-
-$router->determine($route);
-//Phntm::Profile()::dump();
+// remove 'profile: true' to disable profiling
+Phntm::init(profile: true);
 ```
 
 This will set up the namespace router, and determine what to do with the current request.
 
-Next, add the pages namespace to your composer.json pointing to the directory you wish to use, although I would recommend pages/ in the base of your project.
-
-To ensure composer loads all the contents of this directory call the following command to force this.
-```bash
-composer dumpautoload --optimize
+Next, add the Pages namespace to your composer.json pointing to the directory you wish to use, although I would recommend pages/ in the base of your project.
+```json
+{
+    "autoload": {
+        "psr-4": {
+            "Pages\\": "pages/"
+        }
+    }
+}
 ```
-
-Any time you add a new page or file to your pages/ directory you will need to call this to resource the namespace
- - I am currently looking into a way to do this automatically
 
 Then start your local server and do as you wish
 ```bash
@@ -69,26 +65,64 @@ class Page extends PageTemplate
         parent::__construct();
 
         $this->setContent(<<<HTML
+            <h1>home</h1>
+        HTML);
+    }
+}
+```
+
+## Layouts
+
+Similar to NextJS, phntm uses layouts to wrap around the content of a page, this is useful for things like headers and footers, shared assets and more.
+```php
+<?php
+
+namespace Pages;
+ 
+use bchubbweb\phntm\Resources\Layout as LayoutTemplate;
+
+class Layout extends LayoutTemplate
+{
+    public function __construct() {
+
+        $this->registerAsset('/assets/layout.css');
+        $this->registerAsset('/assets/layout.js');
+
+        $this->setContent(<<<HTML
         <html>
+            <head>
+                <title>Phntm</title>
+                <!-- head /-->
+            </head>
             <body>
-                <h1>home</h1>
+                <header>
+                    <nav>
+                        <ul>
+                            <li><a href="/">Home</a></li>
+                            <li><a href="/about">About</a></li>
+                            <li><a href="/users">Users</a></li>
+                        </ul>
+                    </nav>
+                </header>
+                <main>
+                    <!-- content /-->
+                </main>
+                <footer>
+                    <p>Phntm</p>
+                </footer>
+                <!-- profiler /-->
             </body>
         </html>
         HTML);
     }
 }
 ```
+The comments are used to inject the content of the page into the layout, registered assets and the profiler script if enabled.
+
+Unlike NextJS, layouts are limited to one deep, so the closest layout in the namespace for a given page will be used.
 
 ## Profiling
 
-To use the phntm profiler simply call the flag method on bchubbweb\phntm\Profiler\Profiler, and then Profiler::dump() to output the profiling information at a given point.
-```php
+To use the phntm profiler pass true to the Phntm::init() function, this will profile the request and inject the profiler script into the layout.
 
-use bchubbweb\phntm\Profiler\Profiler;
-
-Profiler::flag('start');
-sleep(1);
-Profiler::flag('end');
-
-Profiler::dump();
-```
+The script then fetches the cached profile data from the /api/profiler endpoint, and displays it in a table.
