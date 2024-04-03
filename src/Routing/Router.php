@@ -110,9 +110,6 @@ class Router
             $classLoader = $autoloaderClassName::getLoader();
             $classes = $classLoader->getClassMap();
 
-            var_dump($classes);
-            exit;
-
             $classes = array_filter($classes, function($key) {
                 return (strpos($key, "Pages\\") === 0);
             }, ARRAY_FILTER_USE_KEY);
