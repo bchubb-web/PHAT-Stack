@@ -2,6 +2,7 @@
 
 namespace bchubbweb\phntm;
 
+use bchubbweb\phntm\Resources\Page;
 use bchubbweb\phntm\Routing\Router;
 use bchubbweb\phntm\Profiling\Profiler;
 use Predis\Client;
@@ -12,6 +13,8 @@ final class Phntm
     private static ?Router $routerInstance = null;
     private static ?Profiler $profilerInstance = null;
     private static ?Client $predisInstance = null;
+
+    private static ?Page $page = null;
 
     private function __construct()
     {
@@ -29,6 +32,25 @@ final class Phntm
             self::$instance = new Phntm();
         }
         return self::$instance;
+    }
+
+    public static function init(bool $profile=false): void
+    {
+        if ($profile) {
+            self::Profile();
+        }
+        $router = self::Router();
+
+        $route = $router::getRequestedRoute();
+
+        $page = $router->determine($route);
+
+        if ($profile) {
+            $page->registerProfiler(self::Profile());
+        }
+
+        echo $page->render();
+        self::Profile()->stop();
     }
 
     /**
@@ -68,5 +90,10 @@ final class Phntm
             self::$predisInstance = new Client();
         }
         return self::$predisInstance;
+    }
+
+    public static function Page(Page $page): void
+    {
+        self::$page = $page;
     }
 }

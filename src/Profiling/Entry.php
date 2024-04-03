@@ -16,4 +16,19 @@ class Entry {
         $classname = end($class);
         $this->parent = $classname . '::' . debug_backtrace()[$backtraceIndex]['function'];
     }
+
+    /**
+     * Export the entry as an array
+     *
+     * @return array<string>
+     */
+    public function export(): array
+    {
+        return [
+            'parent' => $this->parent,
+            'message' => $this->message,
+            'timestamp' => $this->timestamp
+        ];
+
+    }
 }

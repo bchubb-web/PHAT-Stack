@@ -8,10 +8,9 @@
 namespace bchubbweb\phntm\Routing;
 
 use ReflectionClass;
-use bchubbweb\phntm\Profiling\Profiler;
 use Predis\Client;
 use bchubbweb\phntm\Phntm;
-use bchubbweb\phntm\Routing\Page;
+use bchubbweb\phntm\Resources\Page;
 
 /**
  * Handles routing and pages
@@ -66,20 +65,21 @@ class Router
      */
     public function __construct()
     {
-        Profiler::flag("Start Autoload");
+        Phntm::Profile()->flag("Start Autoload");
 
         $this->redis = Phntm::Redis();
 
         $classes = $this->autoload();
 
         if (empty($classes)) {
-            Profiler::flag("exec(\"composer dumpautoload --optimize\")");
+            Phntm::Profile()->flag("exec(\"composer dumpautoload --optimize\")");
             exec('composer dumpautoload --optimize');
             $classes = $this->autoload();
         }
-        Profiler::flag("End Autoload");
+        Phntm::Profile()->flag("End Autoload");
 
         $this->pages = array_keys($classes);
+
 
         $this->staticPages = array_filter($this->pages, function($page) {
             return !str_contains($page, "\\_");
@@ -110,15 +110,18 @@ class Router
             $classLoader = $autoloaderClassName::getLoader();
             $classes = $classLoader->getClassMap();
 
+            var_dump($classes);
+            exit;
+
             $classes = array_filter($classes, function($key) {
                 return (strpos($key, "Pages\\") === 0);
             }, ARRAY_FILTER_USE_KEY);
 
             $this->redis->set(static::AUTOLOAD_CLASS_CACHE_KEY, serialize($classes), 'EX', 30);
-            Profiler::flag("Autoloaded classes from composer");
+            Phntm::Profile()->flag("Autoloaded classes from composer");
         } else {
             $classes = unserialize($cachedPages);
-            Profiler::flag("Autoloaded classes from Redis cache");
+            Phntm::Profile()->flag("Autoloaded classes from Redis cache");
         }
 
         return $classes;
@@ -130,16 +133,19 @@ class Router
      * @param Route $route the given route
      * @returns void
      */
-    public function determine(Route $route): void
+    public function determine(Route $route): Page
     {
-        Profiler::flag("Start determination");
+        Phntm::Profile()->flag("Start determination");
+        if ($this->apiRoute($route)) {
+            return $this->apiRoute($route);
+        }
         if (!$this->matches($route)) {
-            Profiler::flag("No static route matches found, matching against dynamic routes");
+            Phntm::Profile()->flag("No static route matches found, matching against dynamic routes");
             $this->dynamicMatches($route);
         }
-        Profiler::flag("End determination");
+        Phntm::Profile()->flag("End determination");
 
-        $this->match($this->bestMatch, $this->params);
+        return $this->match($this->bestMatch, $this->params);
     }
 
     /**
@@ -253,9 +259,9 @@ class Router
      * @param array $params the parameters to pass to the page
      * @returns bool
      */
-    public function match(string $bestMatch, array $params=[]): void
+    public function match(string $bestMatch, array $params=[]): Page
     {
-        Profiler::flag("Matched route: $bestMatch, with params: " . implode(', ', $params));
+        Phntm::Profile()->flag("Matched route: $bestMatch, with params: " . implode(', ', $params));
 
         $layoutRoute = $this->detectLayout($bestMatch);
 
@@ -266,8 +272,7 @@ class Router
             $pageClass->layout($layoutRoute);
         }
 
-        $pageClass->render();
-
+        return $pageClass;
     }
 
     public static function getRequestedRoute(): Route 
@@ -289,7 +294,7 @@ class Router
         }
 
         if ($pageRoute->hasLayout()) {
-            Profiler::flag("Layout found at: " . $pageRoute->layout());
+            Phntm::Profile()->flag("Layout found at: " . $pageRoute->layout());
             return $pageRoute;
         }
 
@@ -308,10 +313,15 @@ class Router
         }
 
         if ($found) {
-            Profiler::flag("Layout found at: " . $pageRoute->layout());
+            Phntm::Profile()->flag("Layout found at: " . $pageRoute->layout());
             return $pageRoute;
         }
 
         return $found;
+    }
+
+    public function apiRoute(Route $route): Page | false
+    {
+        return false;
     }
 }
