@@ -4,6 +4,7 @@ namespace bchubbweb\phntm\Resources;
 
 use bchubbweb\phntm\Profiling\Profiler;
 use bchubbweb\phntm\Routing\Route;
+use bchubbweb\phntm\Phntm;
 use bchubbweb\phntm\Resources\Assets\Asset;
 
 class Page extends Html implements ContentRenderable { 
@@ -16,7 +17,7 @@ class Page extends Html implements ContentRenderable {
 
     public function __construct()
     {
-        Profiler::flag(__NAMESPACE__ . '\Page::__construct()');
+        Phntm::Profile()->flag(__NAMESPACE__ . '\Page::__construct()');
         parent::__construct();
     }
 
@@ -26,7 +27,8 @@ class Page extends Html implements ContentRenderable {
     }
     public function render(): void
     {
-        Profiler::flag("Rendering page content");
+        Phntm::Profile()->flag("Rendering page content");
+
         echo $this->getContent();
     }
 
@@ -45,13 +47,19 @@ class Page extends Html implements ContentRenderable {
         }
     }
 
+    public function registerProfiler(Profiler $profiler): void
+    {
+        $profilerAssets = new Asset($profiler->getScript());
+        $this->content = str_replace('<!-- profiler /-->', $profilerAssets . '<!-- profiler-insert -->', $this->content);
+    }
+
     public function getAssets(): string
     {
         $assets = '';
         foreach ($this->assets as $asset) {
             $assets .= $asset . "\n";
         }
-        return $assets;
+        return $assets . '<!-- head /-->';
     }
 
     public function layout(Route $layoutRoute): Page

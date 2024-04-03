@@ -8,6 +8,7 @@ trait ContentTypeTrait {
 
     public function setContentType(string $contentType): void
     {
+        header('Content-Type: ' . $contentType);
         $this->contentType = $contentType;
     }
     public function getContentType(): string
