@@ -6,7 +6,7 @@
     "autoload": {
         "psr-4": {
             "bchubbweb\\phntm\\": "src/",
-            "pages\\": "pages/"
+            "Pages\\Api\\": "api/"
         }
     },
     "autoload-dev": {
