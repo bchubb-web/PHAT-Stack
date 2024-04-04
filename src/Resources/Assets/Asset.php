@@ -5,6 +5,11 @@ namespace bchubbweb\phntm\Resources\Assets;
 use Stringable;
 use bchubbweb\phntm\Resources\ContentTypeTrait;
 
+/**
+ * Asset class
+ *
+ * Represents an asset to be included in a page
+ */
 class Asset implements Stringable {
 
     use ContentTypeTrait;
@@ -20,6 +25,12 @@ class Asset implements Stringable {
         $this->tag = $this->generateTag($uri);
     }
 
+    /**
+     * Generate the tag for the asset
+     *
+     * @param string $uri
+     * @return string
+     */
     public function generateTag(string $uri): string
     {
         $parts = explode('.', $uri);

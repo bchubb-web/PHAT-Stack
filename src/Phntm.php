@@ -22,19 +22,6 @@ final class Phntm
     }
 
     /**
-     * Get the instance of the Phntm class
-     *
-     * @return Phntm
-     */
-    public static function getInstance(): Phntm
-    {
-        if (null === self::$instance) {
-            self::$instance = new Phntm();
-        }
-        return self::$instance;
-    }
-
-    /**
      * Initialize the Phntm application
      *
      * @param boolean $profile
@@ -99,6 +86,13 @@ final class Phntm
         return self::$predisInstance;
     }
 
+    /**
+     * Set the page instance -- unused 
+     *
+     * @param Page $page
+     *
+     * @return void
+     */
     public static function Page(Page $page): void
     {
         self::$page = $page;

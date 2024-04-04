@@ -15,16 +15,32 @@ class Component implements Stringable, ContentRenderable
 
     }
 
-    public function setContent($content): void
+    /**
+     * set the markup of the component
+     *
+     * @param string $markup
+     * @return void
+     */
+    public function setContent($markup): void
     {
-        $this->content = $content;
+        $this->content = $markup;
     }
 
+    /**
+     * render the component via echo
+     *
+     * @return string
+     */
     public function __toString(): string
     {
        return $this->content;
     }
 
+    /**
+     * render the component directly
+     *
+     * @return void
+     */
     public function render(): void
     {
         echo $this->content;

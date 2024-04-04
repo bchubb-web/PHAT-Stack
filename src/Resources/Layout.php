@@ -4,12 +4,24 @@ namespace bchubbweb\phntm\Resources;
 
 use bchubbweb\phntm\Resources\Page;
 
+/**
+ * Layout class
+ *
+ * Represents a layout to wrap pages
+ */
 class Layout extends Page
 {
     public string $layoutContent = '<!-- content /-->';
     protected string $before = '';
     protected string $after = '';
 
+    /**
+     * Set the content of the layout
+     *
+     * @param string $content
+     * @return void
+     * @throws \Exception
+     */
     public function setContent( $content ): void
     {
         if (strpos($content, '<!-- content /-->') === false) {
@@ -23,12 +35,22 @@ class Layout extends Page
         $this->after = $halves[1];
     }
 
+    /**
+     * Get the layout before the content
+     *
+     * @return string
+     */
     public function before(): string
     {
         $this->before = str_replace('<!-- head /-->', $this->getAssets(), $this->before);
         return $this->before;
     }
 
+    /**
+     * Get the layout after the content
+     *
+     * @return string
+     */
     public function after(): string
     {
         return $this->after;

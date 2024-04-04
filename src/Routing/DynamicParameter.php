@@ -6,6 +6,11 @@ use Stringable;
 use bchubbweb\phntm\Routing\ParameterTypeException;
 use bchubbweb\phntm\Phntm;
 
+/**
+ * DynamicParameter class
+ *
+ * Used to create dynamic parameters to be passed into a page
+ */
 class DynamicParameter implements Stringable
 {
     public mixed $value;
