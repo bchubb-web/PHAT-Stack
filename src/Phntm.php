@@ -4,22 +4,21 @@ namespace bchubbweb\phntm;
 
 use bchubbweb\phntm\Resources\Page;
 use bchubbweb\phntm\Routing\Router;
+use bchubbweb\phntm\Routing\Param;
+use bchubbweb\phntm\Routing\Route;
 use bchubbweb\phntm\Profiling\Profiler;
 use Predis\Client;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 final class Phntm
 {
-    private static ?Phntm $instance = null;
     private static ?Router $routerInstance = null;
     private static ?Profiler $profilerInstance = null;
     private static ?Client $predisInstance = null;
 
-    private static ?Page $page = null;
-
-    private function __construct()
-    {
-
-    }
+    public static Request $request;
+    public static Response $response;
 
     /**
      * Initialize the Phntm application
@@ -33,18 +32,23 @@ final class Phntm
         if ($profile) {
             self::Profile();
         }
-        $router = self::Router();
 
-        $route = $router::getRequestedRoute();
+        self::$request = new Request($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+        self::$response = new Response();
 
-        $page = $router->determine($route);
+        $page = self::Router()->determine();
+
+        $page->callRequestedMethod();
+
+        $page->inject('content', $page->getContent());
 
         if ($profile) {
             $page->registerProfiler(self::Profile());
         }
+        Phntm::$response->getBody()->write($page->getBody());
 
-        echo $page->render();
         self::Profile()->stop();
+        echo Phntm::$response->getBody();
     }
 
     /**

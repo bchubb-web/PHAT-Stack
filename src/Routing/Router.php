@@ -9,7 +9,6 @@ namespace bchubbweb\phntm\Routing;
 
 use ReflectionClass;
 use bchubbweb\phntm\Routing\ParameterTypeException;
-use Predis\Client;
 use bchubbweb\phntm\Phntm;
 use bchubbweb\phntm\Resources\Page;
 
@@ -22,7 +21,6 @@ use bchubbweb\phntm\Resources\Page;
 class Router
 {
     protected const AUTOLOAD_CLASS_CACHE_KEY = 'phntm_autoloaded_classes';
-    protected const TITLES_CACHE_ID = 'accredited_course_category_titles';
 
     /**
      * Stores the possible namespaces
@@ -54,12 +52,6 @@ class Router
      */
     protected array $params = [];
 
-
-    /**
-     * Stores the Redis client
-     */
-    protected ?Client $redis = null;
-
     /**
      * Determine the composer autoloader, then filter out anything other than 
      * the Pages\\ namespace
@@ -68,7 +60,7 @@ class Router
     {
         Phntm::Profile()->flag("Start Autoload");
 
-        $this->redis = Phntm::Redis();
+        Phntm::Redis();
 
         $classes = $this->autoload();
 
@@ -98,7 +90,7 @@ class Router
      */
     protected function autoload(): array
     {
-        $cachedPages = $this->redis->get(static::AUTOLOAD_CLASS_CACHE_KEY);
+        $cachedPages = Phntm::Redis()->get(static::AUTOLOAD_CLASS_CACHE_KEY);
         if ( null === $cachedPages) {
             $res = get_declared_classes();
             $autoloaderClassName = '';
@@ -115,7 +107,7 @@ class Router
                 return (strpos($key, "Pages\\") === 0);
             }, ARRAY_FILTER_USE_KEY);
 
-            $this->redis->set(static::AUTOLOAD_CLASS_CACHE_KEY, serialize($classes), 'EX', 30);
+            Phntm::Redis()->set(static::AUTOLOAD_CLASS_CACHE_KEY, serialize($classes), 'EX', 30);
             Phntm::Profile()->flag("Autoloaded classes from composer");
         } else {
             $classes = unserialize($cachedPages);
@@ -131,19 +123,22 @@ class Router
      * @param Route $route the given route
      * @returns void
      */
-    public function determine(Route $route): Page
+    public function determine(): Page
     {
+        $route = Route::fromRequest(Phntm::$request);
+
         Phntm::Profile()->flag("Start determination");
-        if ($this->apiRoute($route)) {
-            return $this->apiRoute($route);
-        }
+
         if (!$this->matches($route)) {
             Phntm::Profile()->flag("No static route matches found, matching against dynamic routes");
             $this->dynamicMatches($route);
         }
+
+        $matchedPage = $this->match($this->bestMatch, $this->params);
+
         Phntm::Profile()->flag("End determination");
 
-        return $this->match($this->bestMatch, $this->params);
+        return $matchedPage;
     }
 
     /**
@@ -266,67 +261,12 @@ class Router
      */
     public function match(string $bestMatch, array $params=[]): Page
     {
-        Phntm::Profile()->flag("Matched route: $bestMatch, with params: " . implode(', ', $params));
-
-        $layoutRoute = $this->detectLayout($bestMatch);
-
-        /** @var Page $pageClass */
-        $pageClass = new $bestMatch(...$params);
-
-        if ($layoutRoute) { 
-            $pageClass->layout($layoutRoute);
+        if (!empty($params)) {
+            Phntm::Profile()->flag("Matched route: $bestMatch, with params: " . implode(', ', $params));
+        } else {
+            Phntm::Profile()->flag("Matched route: $bestMatch");
         }
 
-        return $pageClass;
-    }
-
-    public static function getRequestedRoute(): Route 
-    {
-        $uri = explode('?', $_SERVER['REQUEST_URI'])[0];
-        $uriParts = explode('/', $uri);
-
-        $uriFormatted = '/' . implode('/', array_map(function ($part) { return ucfirst($part); }, $uriParts));
-
-        $route = new Route($uriFormatted);
-
-        return $route;
-    }
-
-    public function detectLayout(string $bestMatch): Route | false
-    {
-        if (!$pageRoute = Route::fromNamespace($bestMatch)) {
-            return false;
-        }
-
-        if ($pageRoute->hasLayout()) {
-            Phntm::Profile()->flag("Layout found at: " . $pageRoute->layout());
-            return $pageRoute;
-        }
-
-        // negate the loop if the page is the root
-        if ($pageRoute->isRoot()) {
-            return false;
-        }
-
-        $found = false;
-        while (!$pageRoute->isRoot() && !$found) {
-            $pageRoute = $pageRoute->parent();
-            if ($pageRoute->hasLayout()) {
-                $found = true;
-                break;
-            }
-        }
-
-        if ($found) {
-            Phntm::Profile()->flag("Layout found at: " . $pageRoute->layout());
-            return $pageRoute;
-        }
-
-        return $found;
-    }
-
-    public function apiRoute(Route $route): Page | false
-    {
-        return false;
+        return new $bestMatch(...$params);
     }
 }

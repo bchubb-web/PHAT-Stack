@@ -16,11 +16,7 @@ class Asset implements Stringable {
 
     public string $tag = ''; 
 
-    public string $uri = '';
-
-    public string $content = '';
-
-    public function __construct(string $uri)
+    public function __construct(public string $uri)
     {
         $this->tag = $this->generateTag($uri);
     }

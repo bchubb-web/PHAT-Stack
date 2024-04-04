@@ -66,7 +66,13 @@ class Layout extends Page
         return [$this->before(), $this->after()];
     }
 
+    public function getContent(): string
+    {
+        return $this->before() . "<!-- content /-->" . $this->after();
+    }
 
-
-
+    public function __toString(): string
+    {
+        return $this->getContent();
+    }
 }
