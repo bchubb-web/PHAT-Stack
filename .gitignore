@@ -5,3 +5,4 @@ dist/
 inc/connections.php
 .secrets/*.*
 vendor/
+composer.lock
