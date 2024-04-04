@@ -4,5 +4,4 @@ package-lock.json
 dist/
 inc/connections.php
 .secrets/*.*
-
-/vendor/
+vendor/
