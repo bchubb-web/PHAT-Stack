@@ -1,7 +1,7 @@
 {
     "name": "bchubbweb/phntm",
     "description": "A server side stack, focused on DX and simplicity",
-    "type": "project",
+    "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
