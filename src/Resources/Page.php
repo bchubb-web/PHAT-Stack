@@ -49,8 +49,7 @@ class Page extends Html implements ContentRenderable {
 
     public function registerProfiler(Profiler $profiler): void
     {
-        $profilerAssets = new Asset($profiler->getScript());
-        $this->content = str_replace('<!-- profiler /-->', $profilerAssets . '<!-- profiler-insert -->', $this->content);
+        $this->content = str_replace('<!-- profiler /-->', $profiler->getScript() . '<!-- profiler-insert -->', $this->content);
     }
 
     public function getAssets(): string
