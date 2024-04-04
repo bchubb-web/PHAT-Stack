@@ -13,6 +13,13 @@ class Route implements Stringable
         $this->setRoute($requestRoute);
     }
 
+    /**
+     * Create a Route object from a namespace
+     *
+     * @param string $namespace
+     *
+     * @return Route
+     */
     public static function fromNamespace(string $namespace): Route
     {
         $route = str_replace("Pages", "", $namespace);
@@ -20,11 +27,23 @@ class Route implements Stringable
         return new Route($route);
     }
 
+    /**
+     * Set the Route from a uri
+     *
+     * @param string $route
+     *
+     * @return void
+     */
     protected function setRoute(string $route): void
     {
         $this->route = str_replace('//', '/', $route);
     }
 
+    /**
+     * Get the namespace of the route
+     *
+     * @return string
+     */
     public function namespace(): string
     {
         $route = "Pages" . $this->route;
@@ -41,6 +60,11 @@ class Route implements Stringable
         return $route;
     }
 
+    /**
+     * Get th namespace of the route's parent
+     *
+     * @return string
+     */
     public function parentNamespace(): string
     {
         $thisNamespace = $this->namespace();
@@ -49,26 +73,51 @@ class Route implements Stringable
         return implode("\\", $parts);
     }
 
+    /**
+     * Get the parent Route
+     *
+     * @return Route
+     */
     public function parent(): Route
     {
         return Route::fromNamespace($this->parentNamespace());
     }
 
+    /**
+     * Check if the route is the site root
+     *
+     * @return bool
+     */
     public function isRoot(): bool
     {
         return $this->namespace() === "Pages";
     }
 
+    /**
+     * Get the Page class
+     *
+     * @return string
+     */
     public function page(): string
     {
         return $this->namespace() . "\\Page";
     }
 
+    /**
+     * Get the Layout class
+     *
+     * @return bool
+     */
     public function layout(): string
     {
         return $this->namespace() . "\\Layout";
     }
 
+    /**
+     * Check if the route has a direct layout
+     *
+     * @return bool
+     */
     public function hasLayout(): bool
     {
         return class_exists($this->layout());

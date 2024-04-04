@@ -100,10 +100,13 @@ class Profiler
         const generateProfilerTable = (data) => {
             const dialog = document.createElement('dialog');
             dialog.style.minWidth = '60vw';
+            dialog.style.border = '2px solid black';
+            dialog.style.padding = '1em';
+            dialog.style.inset = '0';
             dialog.open = true;
             dialog.id = 'profiler';
 
-            tableString = '<table style="width: 100%"><tbody>';
+            tableString = '<form method="dialog"><button onclick="profiler.close">X</button></form><table style="width: 100%"><tbody>';
             for (let i = 0; i < data.length -1; i++) {
                 const entry = data[i];
                 const duration = data[i+1] ? data[i+1]['timestamp'] - entry['timestamp'] : 0;
