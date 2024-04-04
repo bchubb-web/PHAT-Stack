@@ -34,6 +34,13 @@ final class Phntm
         return self::$instance;
     }
 
+    /**
+     * Initialize the Phntm application
+     *
+     * @param boolean $profile
+     *
+     * @return void
+     */
     public static function init(bool $profile=false): void
     {
         if ($profile) {
