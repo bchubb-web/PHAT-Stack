@@ -17,6 +17,14 @@ class DynamicParameter implements Stringable
         Phntm::Profile()->flag('Built dynamic parameter with value ' . $value . ' and type ' . $type);
     }
 
+    /**
+     * Set the type of the dynamic parameter
+     *
+     * @param mixed &$value
+     * @param string $type
+     *
+     * @return void
+     */
     protected function setType(mixed &$value, string $type): void
     {
         $stringToType = json_decode($value) ?? $value;
