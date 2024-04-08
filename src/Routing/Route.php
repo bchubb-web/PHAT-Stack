@@ -3,6 +3,8 @@
 namespace bchubbweb\phntm\Routing;
 
 use Stringable;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 class Route implements Stringable
 {
@@ -25,6 +27,18 @@ class Route implements Stringable
         $route = str_replace("Pages", "", $namespace);
         $route = str_replace("\\", "/", $route);
         return new Route($route);
+    }
+
+    public static function fromRequest(Request $request): Route
+    {
+        $uri = explode('?', $request->getUri())[0];
+        $uriParts = explode('/', $uri);
+
+        $uriFormatted = '/' . implode('/', array_map(function ($part) { return ucfirst($part); }, $uriParts));
+
+        $route = new Route($uriFormatted);
+
+        return $route;
     }
 
     /**
@@ -106,7 +120,7 @@ class Route implements Stringable
     /**
      * Get the Layout class
      *
-     * @return bool
+     * @return string
      */
     public function layout(): string
     {
