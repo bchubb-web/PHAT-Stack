@@ -2,23 +2,26 @@
 
 namespace bchubbweb\phntm;
 
+use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use bchubbweb\phntm\Resources\Page;
 use bchubbweb\phntm\Routing\Router;
-use bchubbweb\phntm\Routing\Param;
-use bchubbweb\phntm\Routing\Route;
 use bchubbweb\phntm\Profiling\Profiler;
 use Predis\Client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use League\Container\Container;
 
 final class Phntm
 {
     private static ?Router $routerInstance = null;
     private static ?Profiler $profilerInstance = null;
     private static ?Client $predisInstance = null;
+    private static ?Container $containerInstance = null;
 
     public static Request $request;
     public static Response $response;
+
+    public static string $phntm_root;
 
     /**
      * Initialize the Phntm application
@@ -33,22 +36,31 @@ final class Phntm
             self::Profile();
         }
 
-        self::$request = new Request($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
-        self::$response = new Response();
+        self::$phntm_root = realpath(__DIR__ . '/../');
+
+        include self::$phntm_root . '/config/Container.php';
+
+        self::$request = new Request($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], getallheaders());
 
         $page = self::Router()->determine();
 
-        $page->callRequestedMethod();
+        $response = $page->callRequestedMethod();
 
         $page->inject('content', $page->getContent());
 
         if ($profile) {
             $page->registerProfiler(self::Profile());
         }
-        Phntm::$response->getBody()->write($page->getBody());
+
+        self::Profile()->flag('Building response body');
+
+        $response->getBody()->write($page->getBody());
+
+
+        (new SapiEmitter())->emit($response);
 
         self::Profile()->stop();
-        echo Phntm::$response->getBody();
+        //$emitter->emit($response);
     }
 
     /**
@@ -100,5 +112,13 @@ final class Phntm
     public static function Page(Page $page): void
     {
         self::$page = $page;
+    }
+
+    public static function Container(): Container
+    {
+        if (null === self::$containerInstance) {
+            self::$containerInstance = new Container();
+        }
+        return self::$containerInstance;
     }
 }

@@ -2,12 +2,11 @@
 
 namespace bchubbweb\phntm\Resources;
 
-use BadMethodCallException;
 use bchubbweb\phntm\Profiling\Profiler;
 use bchubbweb\phntm\Routing\Route;
-use bchubbweb\phntm\Routing\Param;
 use bchubbweb\phntm\Phntm;
 use bchubbweb\phntm\Resources\Assets\Asset;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
 /**
@@ -23,13 +22,19 @@ class Page extends Html implements ContentRenderable {
 
     public ?Layout $layout;
 
+    public ?Route $route;
+
     protected array $parameters = [];
 
     protected string $body;
 
-    public function __construct()
+    public function __construct(array $params = [])
     {
         Phntm::Profile()->flag("Instantiating page");
+
+        $this->route = Route::fromNamespace($this::class);
+
+        $this->setPageParams($params);
 
         $route = Route::fromNamespace($this::class);
         Phntm::Profile()->flag("Start detecting layout");
@@ -123,6 +128,28 @@ class Page extends Html implements ContentRenderable {
     }
 
     /**
+     * set the dynamic parameters for the page
+     *
+     * @param array $params
+     * @returns void
+     */
+    protected function setPageParams(array $params): void
+    {
+        Phntm::Profile()->flag("Setting page parameters: " . json_encode($params));
+        $this->parameters = $params;
+    }
+
+    /**
+     * Get the dynamic parameters for the page
+     *
+     * @returns array
+     */
+    public function getPageParams(): array
+    {
+        return $this->parameters;
+    }
+
+    /**
      * Wrap the page content with a layout, registering it's assets to the page
      *
      * @param Route $layoutRoute
@@ -157,36 +184,31 @@ class Page extends Html implements ContentRenderable {
         $this->setContent($content);
     }
 
-    public function callRequestedMethod(): void
+    public function callRequestedMethod(): Response
     {
-        $param = new Param(Phntm::$request, Phntm::$response, Route::fromNamespace($this::class));
+        $response = new Response();
 
-        $method = $param->request->getMethod();
+        $method = Phntm::$request->getMethod();
 
-        Phntm::Profile()->flag("calling $method() on {$param->route->page()}");
-        $this->$method($param);
+        Phntm::Profile()->flag("calling $method() on {$this->route->page()} with params: " . json_encode($this->getPageParams()));
+        return $this->$method(Phntm::$request, $response, $this->getPageParams());
     }
 
-    public function get(Param $param): void
-    {
-    }
+    /**
+     * HTTP methods
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param array<mixed> $params
+     * @return Response
+     */
+    public function get(Request $request, Response $response, array $params): Response { }
+    public function post(Request $request, Response $response, array $params): Response { }
+    public function put(Request $request, Response $response, array $params): Response { }
+    public function patch(Request $request, Response $response, array $params): Response { }
+    public function delete(Request $request, Response $response, array $params): Response { }
 
-    public function post(Param $param): void
-    {
-    }
-
-    public function put(Param $param): void
-    {
-    }
-
-    public function patch(Param $param): void
-    {
-    }
-
-    public function delete(Param $param): void
-    {
-    }
-
+    
     public function injectParameters(array $parameters): void
     {
 
