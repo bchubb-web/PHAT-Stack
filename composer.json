@@ -25,6 +25,7 @@
         "predis/predis": "^2.2",
         "league/container": "^4.2",
         "guzzlehttp/psr7": "^2.6",
-        "laminas/laminas-httphandlerrunner": "^2.10"
+        "laminas/laminas-httphandlerrunner": "^2.10",
+        "guzzlehttp/guzzle": "^7.0"
     }
 }
