@@ -6,8 +6,8 @@ use bchubbweb\phntm\Profiling\Profiler;
 use bchubbweb\phntm\Routing\Route;
 use bchubbweb\phntm\Phntm;
 use bchubbweb\phntm\Resources\Assets\Asset;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
+use bchubbweb\phntm\Psr7\Request;
+use bchubbweb\phntm\Psr7\Response;
 
 /**
  * Page class

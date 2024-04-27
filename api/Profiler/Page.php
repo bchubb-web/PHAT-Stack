@@ -4,8 +4,8 @@ namespace Pages\Api\Profiler;
 
 use bchubbweb\phntm\Resources\Page as PageTemplate;
 use bchubbweb\phntm\Phntm;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
+use bchubbweb\phntm\Psr7\Response;
+use bchubbweb\phntm\Psr7\Request;
 
 
 class Page extends PageTemplate

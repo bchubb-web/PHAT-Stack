@@ -4,11 +4,12 @@ namespace bchubbweb\phntm;
 
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use bchubbweb\phntm\Resources\Page;
+use bchubbweb\phntm\Routing\Route;
 use bchubbweb\phntm\Routing\Router;
 use bchubbweb\phntm\Profiling\Profiler;
 use Predis\Client;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
+use bchubbweb\phntm\Psr7\Request;
+use bchubbweb\phntm\Psr7\Response;
 use League\Container\Container;
 
 final class Phntm
@@ -38,9 +39,9 @@ final class Phntm
 
         self::$phntm_root = realpath(__DIR__ . '/../');
 
-        include self::$phntm_root . '/config/Container.php';
-
         self::$request = new Request($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], getallheaders());
+
+        self::$request->setRoute(new Route($_SERVER['REQUEST_URI']));
 
         $page = self::Router()->determine();
 
@@ -53,14 +54,12 @@ final class Phntm
         }
 
         self::Profile()->flag('Building response body');
-
         $response->getBody()->write($page->getBody());
 
-
+        self::Profile()->flag('Emitting response');
         (new SapiEmitter())->emit($response);
 
         self::Profile()->stop();
-        //$emitter->emit($response);
     }
 
     /**
